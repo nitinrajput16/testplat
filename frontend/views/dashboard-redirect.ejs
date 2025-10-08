@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { pageTitle: 'Dashboard' }) %>
+    <script>
+        (function(){
+            try{
+                const token=localStorage.getItem('token');
+                const rawUser=localStorage.getItem('currentUser');
+                if(!token || !rawUser){
+                    window.location.replace('/login');
+                    return;
+                }
+                const user=JSON.parse(rawUser);
+                if(user.role==='admin' || user.role==='instructor'){
+                    window.location.replace('/dashboard-admin');
+                    return;
+                }
+                if(user.role==='student'){
+                    window.location.replace('/dashboard-student');
+                    return;
+                }
+            }catch(error){
+                console.error('Unable to resolve dashboard route',error);
+            }
+            window.location.replace('/login');
+        })();
+    </script>
+</head>
+<body>
+    <p style="padding:40px; font-family:Arial, sans-serif; color:#607d8b;">Redirecting to your dashboard…</p>
+</body>
+</html>

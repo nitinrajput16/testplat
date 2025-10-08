@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { pageTitle: 'Dashboard' }) %>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('partials/navbar', { navActive: 'dashboard' }) %>
+    <main class="dashboard">
+        <header>
+            <h1>Workspace overview</h1>
+            <p id="welcomeMessage" class="muted">Loading your workspace…</p>
+            <div id="dashboardMessage" class="alert info hidden"></div>
+        </header>
+
+        <section id="adminSection" class="role-section hidden">
+            <div class="grid">
+                <article class="card">
+                    <h2>Create organization</h2>
+                    <form id="organizationForm">
+                        <div class="field">
+                            <label for="orgName">Name</label>
+                            <input id="orgName" name="name" type="text" placeholder="e.g. Engineering Department" required>
+                        </div>
+                        <div class="field">
+                            <label for="orgDescription">Description</label>
+                            <textarea id="orgDescription" name="description" placeholder="Short summary (optional)"></textarea>
+                        </div>
+                        <button type="submit">Create organization</button>
+                    </form>
+                </article>
+
+                <article class="card">
+                    <h2>Add teacher</h2>
+                    <form id="teacherForm">
+                        <div class="field">
+                            <label for="teacherName">Full name</label>
+                            <input id="teacherName" name="name" type="text" placeholder="e.g. Priya Sharma" required>
+                        </div>
+                        <div class="field">
+                            <label for="teacherEmail">Email</label>
+                            <input id="teacherEmail" name="email" type="email" placeholder="name@example.com" required>
+                        </div>
+                        <div class="field">
+                            <label for="teacherPassword">Temporary password</label>
+                            <input id="teacherPassword" name="password" type="password" placeholder="Minimum 8 characters" minlength="8" required>
+                        </div>
+                        <div class="field">
+                            <label for="teacherOrganization">Assign to organization (optional)</label>
+                            <select id="teacherOrganization" name="organizationId" data-placeholder="-- Not assigned --">
+                                <option value="">-- Not assigned --</option>
+                            </select>
+                        </div>
+                        <button type="submit">Create teacher account</button>
+                    </form>
+                </article>
+
+                <article class="card">
+                    <h2>Assign teacher to organization</h2>
+                    <form id="assignTeacherForm">
+                        <div class="field">
+                            <label for="assignTeacherSelect">Teacher</label>
+                            <select id="assignTeacherSelect" name="teacherId" required data-placeholder="-- Select teacher --">
+                                <option value="">-- Select teacher --</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="assignOrganizationSelect">Organization</label>
+                            <select id="assignOrganizationSelect" name="organizationId" required data-placeholder="-- Select organization --">
+                                <option value="">-- Select organization --</option>
+                            </select>
+                        </div>
+                        <button type="submit">Assign</button>
+                    </form>
+                </article>
+
+                <article class="card">
+                    <h2>Organizations</h2>
+                    <div class="field search-field">
+                        <label for="organizationSearch">Search organizations</label>
+                        <input id="organizationSearch" type="search" placeholder="Filter by name, description, or teacher">
+                    </div>
+                    <div class="scrollable-list">
+                        <ul id="organizationList" class="list"></ul>
+                        <p id="organizationEmpty" class="empty-state hidden">No organizations yet. Create one to get started.</p>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <h2>Teachers</h2>
+                    <div class="field search-field">
+                        <label for="teacherSearch">Search teachers</label>
+                        <input id="teacherSearch" type="search" placeholder="Filter by name, email, or organization">
+                    </div>
+                    <div class="scrollable-list">
+                        <ul id="teacherList" class="list"></ul>
+                        <p id="teacherEmpty" class="empty-state hidden">No teachers registered yet.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="instructorSection" class="role-section hidden">
+            <div id="instructorNav" class="instructor-navigation" role="tablist" aria-label="Instructor workspace">
+                <button type="button" id="instructorTab-overview" class="instructor-tab active" role="tab" aria-selected="true" aria-controls="instructorPage-overview" data-instructor-page-target="overview">Exam overview</button>
+                <button type="button" id="instructorTab-questions" class="instructor-tab" role="tab" aria-selected="false" aria-controls="instructorPage-questions" data-instructor-page-target="questions">Exam questions</button>
+                <button type="button" id="instructorTab-submissions" class="instructor-tab" role="tab" aria-selected="false" aria-controls="instructorPage-submissions" data-instructor-page-target="submissions">Student submissions</button>
+            </div>
+
+            <div id="instructorPage-overview" class="instructor-page" data-instructor-page="overview" role="tabpanel" aria-labelledby="instructorTab-overview" aria-hidden="false">
+                <div class="grid">
+                    <article class="card">
+                        <h2>Create exam</h2>
+                        <form id="examForm">
+                            <div class="field">
+                                <label for="examTitle">Title</label>
+                                <input id="examTitle" name="title" type="text" placeholder="e.g. Midterm Assessment" required>
+                            </div>
+                            <div class="field">
+                                <label for="examDescription">Description</label>
+                                <textarea id="examDescription" name="description" placeholder="Short overview"></textarea>
+                            </div>
+                            <div class="field">
+                                <label for="examDuration">Duration (minutes)</label>
+                                <input id="examDuration" name="durationMinutes" type="number" min="5" step="5" required>
+                            </div>
+                            <div class="field">
+                                <label for="examVisibility">Availability</label>
+                                <select id="examVisibility" name="visibility">
+                                    <option value="public">All students</option>
+                                    <option value="organizations">Specific organizations</option>
+                                    <option value="custom">Specific students (emails)</option>
+                                    <option value="mixed">Organizations + specific students</option>
+                                </select>
+                            </div>
+                            <div class="field hidden" id="examOrganizationsField">
+                                <label for="examOrganizations">Organizations</label>
+                                <select id="examOrganizations" name="organizationIds" multiple data-placeholder="-- Select organization --"></select>
+                                <p id="examOrganizationsHint" class="muted small">Hold Ctrl (or Cmd on Mac) to select multiple organizations.</p>
+                            </div>
+                            <div class="field hidden" id="examStudentsField">
+                                <label for="customStudentEmails">Student emails</label>
+                                <textarea id="customStudentEmails" name="studentEmails" placeholder="student1@example.com, student2@example.com"></textarea>
+                                <p class="muted small">Separate email addresses with commas or new lines.</p>
+                            </div>
+                            <div class="field">
+                                <label for="examStartsAt">Start time</label>
+                                <input id="examStartsAt" name="startsAt" type="datetime-local">
+                            </div>
+                            <div class="field">
+                                <label for="examEndsAt">End time</label>
+                                <input id="examEndsAt" name="endsAt" type="datetime-local">
+                            </div>
+                            <div class="actions">
+                                <button type="submit" id="examSubmitButton">Publish exam</button>
+                                <button type="button" id="cancelExamEditButton" class="link-button hidden">Cancel edit</button>
+                            </div>
+                        </form>
+                        <p class="cta">Use the “Exam questions” tab to add questions after creating an exam.</p>
+                    </article>
+
+                    <article class="card">
+                        <h2>My exams</h2>
+                        <ul id="myExams" class="list"></ul>
+                        <p id="myExamsEmpty" class="empty-state hidden">No exams yet. Create one to see it here.</p>
+                    </article>
+                </div>
+            </div>
+
+            <div id="instructorPage-questions" class="instructor-page hidden" data-instructor-page="questions" role="tabpanel" aria-labelledby="instructorTab-questions" aria-hidden="true">
+                <div class="grid">
+                    <article class="card">
+                        <h2>Create exam questions</h2>
+                        <div class="field">
+                            <label for="questionExamSelect">Exam</label>
+                            <select id="questionExamSelect" data-placeholder="-- Select exam --">
+                                <option value="">-- Select exam --</option>
+                            </select>
+                        </div>
+
+                        <form id="questionForm" class="hidden">
+                            <div class="field">
+                                <label for="questionText">Question</label>
+                                <textarea id="questionText" name="text" placeholder="Enter the question" required></textarea>
+                            </div>
+
+                            <div class="field">
+                                <label for="questionCategory">Category</label>
+                                <input id="questionCategory" name="category" type="text" placeholder="e.g. Arrays, Algebra" list="questionCategorySuggestions" value="General">
+                                <datalist id="questionCategorySuggestions">
+                                    <option value="General"></option>
+                                    <option value="Basics"></option>
+                                    <option value="Algorithms"></option>
+                                    <option value="Data Structures"></option>
+                                    <option value="Theory"></option>
+                                </datalist>
+                                <p class="muted small">Use categories to group questions by topic. You can customise this label per question.</p>
+                            </div>
+
+                            <div class="field">
+                                <label for="questionType">Question type</label>
+                                <select id="questionType" name="type">
+                                    <option value="mcq">Multiple choice</option>
+                                    <option value="written">Written answer</option>
+                                    <option value="code">Code challenge</option>
+                                </select>
+                            </div>
+
+                            <div id="mcqFields">
+                                <div class="option-grid">
+                                    <div class="field">
+                                        <label for="option0">Option 1</label>
+                                        <input id="option0" name="option0" type="text" data-option-index="0" placeholder="Answer option">
+                                    </div>
+                                    <div class="field">
+                                        <label for="option1">Option 2</label>
+                                        <input id="option1" name="option1" type="text" data-option-index="1" placeholder="Answer option">
+                                    </div>
+                                    <div class="field">
+                                        <label for="option2">Option 3</label>
+                                        <input id="option2" name="option2" type="text" data-option-index="2" placeholder="Answer option optional">
+                                    </div>
+                                    <div class="field">
+                                        <label for="option3">Option 4</label>
+                                        <input id="option3" name="option3" type="text" data-option-index="3" placeholder="Answer option optional">
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label for="correctOption">Correct answer</label>
+                                    <select id="correctOption" name="correctOption">
+                                        <option value="0">Option 1</option>
+                                        <option value="1">Option 2</option>
+                                        <option value="2">Option 3</option>
+                                        <option value="3">Option 4</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field hidden" id="expectedAnswerField">
+                                <label for="expectedAnswer">Expected answer (optional)</label>
+                                <textarea id="expectedAnswer" name="expectedAnswer" placeholder="Provide a reference answer or leave empty for manual grading"></textarea>
+                                <p class="muted small">If left blank, the response will require manual grading.</p>
+                            </div>
+
+                            <div class="code-fields hidden" id="codeFields">
+                                <div class="field">
+                                    <label for="codeLanguage">Programming language</label>
+                                    <select id="codeLanguage">
+                                        <option value="63" data-monaco="javascript">JavaScript (Node)</option>
+                                        <option value="71" data-monaco="python">Python (3.11)</option>
+                                        <option value="54" data-monaco="cpp">C++ (GCC 13)</option>
+                                        <option value="62" data-monaco="java">Java (JDK 17)</option>
+                                        <option value="50" data-monaco="c">C (GCC 13)</option>
+                                        <option value="73" data-monaco="rust">Rust</option>
+                                        <option value="78" data-monaco="kotlin">Kotlin</option>
+                                        <option value="51" data-monaco="csharp">C#</option>
+                                        <option value="68" data-monaco="php">PHP</option>
+                                        <option value="74" data-monaco="typescript">TypeScript</option>
+                                        <option value="80" data-monaco="r">R</option>
+                                        <option value="82" data-monaco="sql">SQL</option>
+                                        <option value="72" data-monaco="ruby">Ruby</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="codeStarterValue">Starter code</label>
+                                    <div id="codeStarterEditor" class="code-editor"></div>
+                                    <textarea id="codeStarterValue" class="hidden"></textarea>
+                                    <p class="muted small">Students will see this code pre-filled in the editor.</p>
+                                </div>
+
+                                <div class="field-group">
+                                    <div class="field">
+                                        <label for="codeTimeLimit">Time limit (seconds)</label>
+                                        <input id="codeTimeLimit" type="number" min="1" max="20" value="5">
+                                    </div>
+                                    <div class="field">
+                                        <label for="codeMemoryLimit">Memory limit (KB)</label>
+                                        <input id="codeMemoryLimit" type="number" min="64000" max="512000" value="128000">
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Test cases</label>
+                                    <div id="codeTestcasesContainer" class="testcase-list"></div>
+                                    <button type="button" id="addTestcaseButton" class="secondary">Add test case</button>
+                                    <p class="muted small">Provide at least one test case. Mark it as public to show it as a sample for students.</p>
+                                </div>
+                            </div>
+
+                            <div class="actions">
+                                <button type="submit" id="questionSubmitButton">Add question</button>
+                                <button type="button" id="cancelQuestionEditButton" class="link-button hidden">Cancel edit</button>
+                            </div>
+                        </form>
+
+                        <p id="questionImportHint" class="muted small import-hint">Or upload a CSV file to add multiple multiple-choice questions at once.</p>
+
+                        <form id="questionImportForm" class="import-form" enctype="multipart/form-data" novalidate>
+                            <div class="field">
+                                <label for="questionCsvInput">CSV file</label>
+                                <input type="file" id="questionCsvInput" name="file" accept=".csv" required>
+                                <p class="muted small">Headers: Category (optional), Question, Option 1-4, Correct Option (1-4 or matching text). <a href="/templates/mcq-import-template.csv" download>Download sample template</a>.</p>
+                            </div>
+                            <div class="actions">
+                                <button type="submit" class="secondary">Import MCQ questions</button>
+                            </div>
+                            <p id="questionImportHelper" class="muted small">Select an exam above to enable CSV imports.</p>
+                        </form>
+                        <div id="questionImportIssues" class="import-issues hidden" aria-live="polite"></div>
+
+                        <div id="questionPreview" class="question-preview hidden">
+                            <h3>Live preview</h3>
+                            <p class="muted small">See how the question will appear to students on the exam page.</p>
+                            <div id="questionPreviewContent"></div>
+                        </div>
+
+                        <ul id="questionList" class="list"></ul>
+                        <p id="questionEmpty" class="empty-state">Select an exam to manage questions.</p>
+                    </article>
+                </div>
+            </div>
+
+            <div id="instructorPage-submissions" class="instructor-page hidden" data-instructor-page="submissions" role="tabpanel" aria-labelledby="instructorTab-submissions" aria-hidden="true">
+                <div class="grid">
+                    <article class="card">
+                        <h2>Student submissions</h2>
+                        <p class="muted small">Pick an exam from the “Exam overview” tab to review student attempts.</p>
+                        <div id="submissionsPanel" class="submissions-panel">
+                            <div id="submissionsHeader" class="submissions-header hidden">
+                                <div>
+                                    <h3 id="submissionsExamTitle">Student submissions</h3>
+                                    <p id="submissionsSummary" class="muted small"></p>
+                                </div>
+                                <div class="submissions-actions">
+                                    <button id="refreshSubmissionsButton" type="button" class="secondary hidden">Refresh</button>
+                                </div>
+                            </div>
+                            <div id="submissionsLoading" class="muted hidden">Loading submissions…</div>
+                            <p id="submissionsEmpty" class="empty-state">Select an exam to view submissions.</p>
+                            <ul id="submissionsList" class="list submissions-list"></ul>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+    <script>window.MONACO_BASE_URL='https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs/loader.min.js"></script>
+    <script src="/js/monaco-utils.js"></script>
+    <script src="/js/dashboard-admin.js"></script>
+</body>
+</html>

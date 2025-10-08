@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { pageTitle: 'Profile' }) %>
+    <link rel="stylesheet" href="/css/profile.css">
+</head>
+<body>
+    <%- include('partials/navbar', { navActive: 'profile' }) %>
+
+    <main class="profile-page">
+        <header class="profile-header">
+            <h1>Your profile</h1>
+            <p id="profileSubheading" class="muted">Keep your details up to date so instructors and students know who you are.</p>
+        </header>
+
+        <div id="profileMessage" class="alert info hidden"></div>
+
+        <section class="profile-grid">
+            <article class="card profile-card" aria-live="polite">
+                <div class="profile-identity">
+                    <div id="profileAvatar" class="profile-avatar" aria-hidden="true">?</div>
+                    <div>
+                        <h2 id="profileNameDisplay">Loading…</h2>
+                        <p id="profileRoleDisplay" class="muted">Role</p>
+                    </div>
+                </div>
+                <dl class="profile-details">
+                    <div>
+                        <dt>Email</dt>
+                        <dd id="profileEmailDisplay">—</dd>
+                    </div>
+                    <div>
+                        <dt>Organizations</dt>
+                        <dd id="profileOrganizationsDisplay" class="profile-organizations">—</dd>
+                    </div>
+                    <div>
+                        <dt>Member since</dt>
+                        <dd id="profileJoinedDisplay">—</dd>
+                    </div>
+                    <div>
+                        <dt>Last updated</dt>
+                        <dd id="profileUpdatedDisplay">—</dd>
+                    </div>
+                </dl>
+            </article>
+
+            <article class="card profile-update-card">
+                <h2>Update personal info</h2>
+                <form id="profileUpdateForm" novalidate>
+                    <div class="field">
+                        <label for="profileNameInput">Full name</label>
+                        <input type="text" id="profileNameInput" name="name" autocomplete="name" required>
+                    </div>
+                    <div class="field">
+                        <label for="profileEmailInput">Email address</label>
+                        <input type="email" id="profileEmailInput" name="email" autocomplete="email" required>
+                    </div>
+                    <div class="field hidden" id="profileOrganizationsField">
+                        <label for="profileOrganizationsSelect">Organizations</label>
+                        <select id="profileOrganizationsSelect" name="organizationIds" multiple></select>
+                        <p id="profileOrganizationsHint" class="muted small">Hold Ctrl (or Cmd on Mac) to select multiple organizations.</p>
+                    </div>
+                    <div class="actions">
+                        <button type="submit">Save changes</button>
+                    </div>
+                </form>
+            </article>
+
+            <article class="card profile-password-card">
+                <h2>Change password</h2>
+                <form id="passwordUpdateForm" novalidate>
+                    <div class="field">
+                        <label for="currentPasswordInput">Current password</label>
+                        <input type="password" id="currentPasswordInput" name="currentPassword" autocomplete="current-password" minlength="8" required>
+                    </div>
+                    <div class="field">
+                        <label for="newPasswordInput">New password</label>
+                        <input type="password" id="newPasswordInput" name="password" autocomplete="new-password" minlength="8" required>
+                    </div>
+                    <div class="field">
+                        <label for="confirmPasswordInput">Confirm new password</label>
+                        <input type="password" id="confirmPasswordInput" name="confirmPassword" autocomplete="new-password" minlength="8" required>
+                    </div>
+                    <p class="muted small">Passwords must be at least 8 characters long.</p>
+                    <div class="actions">
+                        <button type="submit" class="secondary">Update password</button>
+                    </div>
+                </form>
+            </article>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+    <script src="/js/profile.js"></script>
+</body>
+</html>

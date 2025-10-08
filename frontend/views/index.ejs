@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { pageTitle: pageTitle || 'Home' }) %>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/navbar', { navActive: navActive || 'home' }) %>
+    <main id="main">
+        <header id="examHeader">
+            <h1 id="examTitle">Loading exam…</h1>
+            <p id="examMeta" class="muted">Retrieving exam details. Stay ready!</p>
+            <p id="examDescription" class="muted hidden"></p>
+            <div id="examTimer" class="exam-timer hidden" aria-live="polite">
+                <span class="timer-label">Time elapsed:</span>
+                <span id="timerElapsed" class="timer-value">00:00</span>
+                <span class="timer-separator">/</span>
+                <span id="timerTotal" class="timer-value">00:00</span>
+            </div>
+            <div id="examStatus" class="alert info hidden"></div>
+        </header>
+
+        <div id="categoryBar" class="category-bar hidden">
+            <div class="category-info">
+                <p id="categoryActiveLabel" class="category-active-label">Category: —</p>
+                <p id="categoryProgressLabel" class="category-progress-label muted small">Awaiting questions…</p>
+            </div>
+            <div id="categoryChips" class="category-chip-list" role="tablist" aria-label="Question categories"></div>
+        </div>
+
+        <div id="option">
+            <button id="prevButton" class="secondary">Previous</button>
+            <div id="progressBar">
+                <div id="progress"></div>
+            </div>
+            <button id="nextButton">Next</button>
+        </div>
+
+        <div id="examMetaRow">
+            <p id="questionCounter" class="muted">Question 0 of 0</p>
+            <p id="answerCounter" class="muted">0 answered</p>
+        </div>
+
+        <div id="content" class="exam-content">
+            <p class="muted">Select an exam from your dashboard to begin.</p>
+        </div>
+
+        <div id="foption">
+            <button id="exitButton" class="secondary">Back to dashboard</button>
+            <button id="submitButton">Submit answers</button>
+        </div>
+    </main>
+    <div id="tabWarningModal" class="tab-warning hidden" role="alertdialog" aria-modal="true" aria-labelledby="tabWarningTitle">
+        <div class="tab-warning__content" role="document">
+            <h2 id="tabWarningTitle">Please stay in the exam</h2>
+            <p id="tabWarningMessage">Switching tabs has been detected. Stay focused on the exam window to avoid penalties.</p>
+            <button id="tabWarningDismiss" class="primary">I understand</button>
+        </div>
+    </div>
+    <%- include('partials/footer') %>
+    <script>window.MONACO_BASE_URL='https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs/loader.min.js"></script>
+    <script src="/js/monaco-utils.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+const mongoose=require('mongoose');
+
+const codeTestResultSchema=new mongoose.Schema({
+    index:{
+        type:Number,
+        min:0
+    },
+    passed:{
+        type:Boolean,
+        default:false
+    },
+    statusId:{
+        type:Number
+    },
+    statusDescription:{
+        type:String
+    },
+    stdout:{
+        type:String
+    },
+    stderr:{
+        type:String
+    },
+    time:{
+        type:String
+    },
+    memory:{
+        type:Number
+    }
+},{
+    _id:false
+});
+
+const codeAnswerSchema=new mongoose.Schema({
+    languageId:{
+        type:Number,
+        required:true
+    },
+    languageName:{
+        type:String,
+        trim:true
+    },
+    source:{
+        type:String,
+        required:true
+    },
+    lastRunInput:{
+        type:String,
+        default:''
+    },
+    lastRunOutput:{
+        type:String,
+        default:''
+    },
+    lastRunError:{
+        type:String,
+        default:''
+    },
+    statusId:{
+        type:Number
+    },
+    statusDescription:{
+        type:String
+    },
+    time:{
+        type:String
+    },
+    memory:{
+        type:Number
+    },
+    testResults:{
+        type:[codeTestResultSchema],
+        default:[]
+    },
+    manualReviewRequired:{
+        type:Boolean,
+        default:false
+    },
+    notes:{
+        type:String,
+        default:''
+    }
+},{
+    _id:false
+});
+
+const answerSchema=new mongoose.Schema({
+    question:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Question',
+        required:true
+    },
+    selectedOptionIndex:{
+        type:Number,
+        min:0
+    },
+    answerText:{
+        type:String,
+        trim:true,
+        default:''
+    },
+    codeAnswer:{
+        type:codeAnswerSchema
+    },
+    isCorrect:{
+        type:Boolean
+    }
+},{
+    _id:false
+});
+
+const submissionSchema=new mongoose.Schema({
+    exam:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Exam',
+        required:true
+    },
+    student:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User',
+        required:true
+    },
+    session:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'ExamSession'
+    },
+    answers:{
+        type:[answerSchema],
+        default:[]
+    },
+    score:{
+        type:Number,
+        default:0,
+        min:0
+    },
+    submittedAt:{
+        type:Date,
+        default:Date.now
+    }
+},{
+    timestamps:true
+});
+
+submissionSchema.index({ exam:1, student:1 },{ unique:true });
+submissionSchema.index({ session:1 });
+
+module.exports=mongoose.model('Submission',submissionSchema);

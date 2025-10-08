@@ -1,0 +1,13 @@
+Category,Question,Option 1,Option 2,Option 3,Option 4,Correct Option
+DBMS,Which of the following is not a SQL command?,SELECT,INSERT,UPDATE,CONNECT,4
+CN,Which protocol is connectionless,TCP,UDP,FTP,SMTP,2
+CN,Which device operates at the data link layer,Router,Switch,Hub,Bridge,4
+CN,Which address is used to identify a device in a network,MAC,IP,Port,Socket,2
+CN,Which layer is responsible for end to end delivery,Physical,Network,Transport,Session,3
+OS,Which algorithm is non preemptive,Round Robin,SJF,Priority,FCFS,4
+OS,Which memory is directly accessible by CPU,Cache,RAM,Hard Disk,Virtual,1
+OS,Which of the following is not a type of OS,Distributed,Real time,Time sharing,Non sharing,4
+OS,Which technique allows multiple processes to share CPU time,Multiprocessing,Multithreading,Time slicing,Swapping,3
+Technical,Which of the following is not a compiled language,C,C++,Java,Python,4
+Technical,Which searching algorithm works only on sorted arrays,Binary search,Linear search,DFS,BFS,1
+Technical,Which data structure is used in BFS,Stack,Queue,Array,Heap,2

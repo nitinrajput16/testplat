@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { pageTitle: 'Dashboard' }) %>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('partials/navbar', { navActive: 'dashboard' }) %>
+    <main class="dashboard">
+        <header>
+            <h1>Welcome back!</h1>
+            <p id="welcomeMessage" class="muted">Loading your workspace…</p>
+            <div id="dashboardMessage" class="alert info hidden"></div>
+        </header>
+
+        <section id="studentSection" class="role-section">
+            <div class="grid">
+                <article class="card">
+                    <h2>Upcoming exams</h2>
+                    <ul id="upcomingExams" class="list"></ul>
+                    <p id="upcomingEmpty" class="empty-state hidden">There are no upcoming exams right now.</p>
+                </article>
+
+                <article class="card" id="readyExamCard">
+                    <h2>Ready to take a test?</h2>
+                    <div id="readyExamEmpty" class="muted">Choose an exam from the list to launch the dedicated test page.</div>
+                    <div id="readyExamDetails" class="hidden">
+                        <h3 id="readyExamTitle"></h3>
+                        <p id="readyExamSchedule" class="muted small"></p>
+                        <p id="readyExamDescription" class="muted"></p>
+                        <p id="readyExamAudience" class="muted small hidden"></p>
+                        <div class="actions-row">
+                            <button type="button" id="readyExamStart">Start exam</button>
+                            <button type="button" id="refreshUpcoming" class="secondary">Refresh list</button>
+                        </div>
+                        <p class="muted small">Starting an exam opens the index test page in this window.</p>
+                    </div>
+                    <div id="readyExamAlreadyAttempted" class="alert info hidden">You have already submitted this exam.</div>
+                </article>
+
+                <article class="card" id="examTipsCard">
+                    <h2>How the online exam page works</h2>
+                    <ul class="info-list">
+                        <li>Click <strong>Start exam</strong> to open the test experience on the landing page.</li>
+                        <li>Your answers auto-save in the browser until you submit.</li>
+                        <li>You can return to this dashboard at any time from the exam page.</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+    <script src="/js/dashboard-student.js"></script>
+</body>
+</html>

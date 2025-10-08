@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { pageTitle: 'Register' }) %>
+    <style>
+        main{
+            max-width:520px;
+            margin:40px auto;
+            padding:32px;
+            background-color:#ffffff;
+            border-radius:10px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        }
+        h1{
+            margin-bottom:24px;
+            text-align:center;
+        }
+        form{
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+        label{
+            font-weight:600;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"]{
+            width:100%;
+            padding:10px 12px;
+            border:1px solid #cfd8dc;
+            border-radius:6px;
+            font-size:16px;
+        }
+        select{
+            width:100%;
+            padding:10px 12px;
+            border:1px solid #cfd8dc;
+            border-radius:6px;
+            font-size:16px;
+            background-color:#ffffff;
+        }
+        .alert{
+            display:none;
+            border-radius:6px;
+            padding:12px;
+            font-size:14px;
+        }
+        .alert.error{
+            background-color:#ffebee;
+            color:#c62828;
+        }
+        .alert.success{
+            background-color:#e8f5e9;
+            color:#2e7d32;
+        }
+        .actions{
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+        }
+        .actions button{
+            width:100%;
+        }
+        .switch{
+            text-align:center;
+            font-size:14px;
+        }
+        .switch a{
+            color:#0077cc;
+        }
+        .helper-text{
+            margin-top:4px;
+            font-size:13px;
+            color:#607d8b;
+        }
+        .helper-text.error{
+            color:#c62828;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar', { navActive: 'register' }) %>
+
+    <main>
+        <h1>Create a student account</h1>
+        <div id="message" class="alert"></div>
+        <form id="registerForm">
+            <div>
+                <label for="name">Full name</label>
+                <input type="text" id="name" name="name" placeholder="Alex Johnson" required>
+            </div>
+            <div>
+                <label for="email">School email</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Minimum 8 characters" required minlength="8">
+            </div>
+            <div>
+                <label for="organization">Organization</label>
+                <select id="organization" name="organizationId" required>
+                    <option value="">Select your organization</option>
+                </select>
+                <p id="organizationHelp" class="helper-text">Choose the organization provided by your school.</p>
+            </div>
+            <div class="actions">
+                <button type="submit">Register</button>
+                <button type="button" id="backToLogin" class="secondary">Back to Login</button>
+            </div>
+        </form>
+        <p class="switch">Already have an account? <a href="/login">Sign in here</a>.</p>
+    </main>
+
+    <%- include('partials/footer') %>
+    <script src="/js/register.js"></script>
+</body>
+</html>
