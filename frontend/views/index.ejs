@@ -3,6 +3,7 @@
 <head>
     <%- include('partials/head', { pageTitle: pageTitle || 'Home' }) %>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/theme-modern.css">
 </head>
 <body>
     <%- include('partials/navbar', { navActive: navActive || 'home' }) %>
@@ -29,7 +30,7 @@
         </div>
 
         <div id="option">
-            <button id="prevButton" class="secondary">Previous</button>
+            <button id="prevButton">Previous</button>
             <div id="progressBar">
                 <div id="progress"></div>
             </div>
