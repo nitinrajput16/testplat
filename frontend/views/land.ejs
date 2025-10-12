@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { pageTitle: pageTitle || 'Welcome' }) %>
+    <link rel="stylesheet" href="/css/theme-modern.css">
+    <link rel="stylesheet" href="/css/landing.css">
+</head>
+<body class="landing">
+    <%- include('partials/navbar', { navActive: navActive || 'home' }) %>
+    <main class="landing-main">
+        <section class="hero" aria-labelledby="heroTitle">
+            <div class="hero__content">
+                <span class="hero__badge">
+                    <span class="hero__badge-icon" aria-hidden="true">★</span>
+                    Trusted by 50,000+ educators worldwide
+                </span>
+                <h1 class="hero__title" id="heroTitle">
+                    Test Smarter,<br>
+                    <span class="hero__title-accent">Learn Better</span>
+                </h1>
+                <p class="hero__subtitle">
+                    Transform your assessment experience with intelligent tooling that adapts to the way you teach and learn. Launch secure exams, monitor performance live, and analyze outcomes with confidence.
+                </p>
+                <div class="hero__actions">
+                    <a class="btn primary hero__btn" href="/register">
+                        <span class="hero__btn-icon" aria-hidden="true">🎓</span>
+                        Start as Student
+                    </a>
+                    <a class="btn outline hero__btn" href="/login">
+                        <span class="hero__btn-icon" aria-hidden="true">🧑‍🏫</span>
+                        Start as Teacher
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--light" aria-labelledby="modernTitle">
+            <div class="section__inner">
+                <header class="section__header">
+                    <h2 id="modernTitle">Built for Modern Education</h2>
+                    <p>Whether you are a student aiming to excel or an educator designing assessments, TestPlat gives you the tools to succeed.</p>
+                </header>
+
+                <div class="pill-badge">
+                    <span class="pill-badge__icon" aria-hidden="true">🎓</span>
+                    For Students
+                </div>
+
+                <div class="feature-grid" role="list">
+                    <article class="feature-card" role="listitem">
+                        <span class="feature-card__icon" aria-hidden="true">📝</span>
+                        <h3>Interactive Tests</h3>
+                        <p>Engage with adaptive question sets, instant code execution, and real-time proctoring safeguards.</p>
+                    </article>
+                    <article class="feature-card" role="listitem">
+                        <span class="feature-card__icon" aria-hidden="true">📈</span>
+                        <h3>Progress Tracking</h3>
+                        <p>Visualize growth with dashboards that summarize attempts, mastery, and strengths in seconds.</p>
+                    </article>
+                    <article class="feature-card" role="listitem">
+                        <span class="feature-card__icon" aria-hidden="true">⏰</span>
+                        <h3>Flexible Scheduling</h3>
+                        <p>Take exams anytime with smart reminders, timezone awareness, and automatic resume protection.</p>
+                    </article>
+                </div>
+
+                <div class="pill-badge pill-badge--secondary">
+                    <span class="pill-badge__icon" aria-hidden="true">🧑‍🏫</span>
+                    For Teachers
+                </div>
+
+                <div class="feature-grid" role="list">
+                    <article class="feature-card" role="listitem">
+                        <span class="feature-card__icon" aria-hidden="true">📚</span>
+                        <h3>Test Builder</h3>
+                        <p>Create comprehensive assessments with reusable question banks, blueprinting, and tagging.</p>
+                    </article>
+                    <article class="feature-card" role="listitem">
+                        <span class="feature-card__icon" aria-hidden="true">👥</span>
+                        <h3>Class Management</h3>
+                        <p>Organize cohorts, automate invites, and receive alerts on learner progress and engagement.</p>
+                    </article>
+                    <article class="feature-card" role="listitem">
+                        <span class="feature-card__icon" aria-hidden="true">🛡️</span>
+                        <h3>Anti-Cheating</h3>
+                        <p>Leverage browser lockdown, AI anomaly detection, and manual review queues to ensure integrity.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--halo" aria-labelledby="trustedTitle">
+            <div class="section__inner">
+                <header class="section__header section__header--center">
+                    <h2 id="trustedTitle">Trusted by Leading Institutions</h2>
+                    <p>Universities and learning collectives worldwide rely on TestPlat to evaluate skill with confidence.</p>
+                </header>
+                <div class="logo-strip" role="list">
+                    <div class="logo-strip__item" role="listitem">Stanford</div>
+                    <div class="logo-strip__item" role="listitem">MIT</div>
+                    <div class="logo-strip__item" role="listitem">Harvard</div>
+                    <div class="logo-strip__item" role="listitem">Oxford</div>
+                    <div class="logo-strip__item" role="listitem">Cambridge</div>
+                    <div class="logo-strip__item" role="listitem">Berkeley</div>
+                    <div class="logo-strip__item" role="listitem">Yale</div>
+                    <div class="logo-strip__item" role="listitem">Princeton</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--cta" aria-labelledby="ctaTitle">
+            <div class="section__inner section__inner--cta">
+                <div class="cta__content">
+                    <h2 id="ctaTitle">Ready to transform your testing experience?</h2>
+                    <p>Join thousands of educators and students already delivering confident online assessments with TestPlat.</p>
+                </div>
+                <div class="cta__actions">
+                    <a class="btn primary cta__btn" href="/register">
+                        <span class="hero__btn-icon" aria-hidden="true">🚀</span>
+                        Get Started Free
+                    </a>
+                    <a class="btn outline cta__btn" href="/login">
+                        <span class="hero__btn-icon" aria-hidden="true">🗓️</span>
+                        Schedule Demo
+                    </a>
+                </div>
+            </div>
+        </section>
+        <%- include('partials/footer') %>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" referrerpolicy="no-referrer" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" referrerpolicy="no-referrer" defer></script>
+    <script src="/js/landing.js" defer></script>
+</body>
+</html>
