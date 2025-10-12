@@ -53,11 +53,15 @@ app.use('/api/users',userRoutes);
 
 if(hasViewsDir){
     app.get('/',(_req,res)=>{
-        res.redirect('/login');
+        res.redirect('/land');
     });
 
     app.get('/home',(_req,res)=>{
         res.render('index',{ pageTitle:'Home', navActive:'home' });
+    });
+
+    app.get('/land',(_req,res)=>{
+        res.render('land',{ pageTitle:'Welcome', navActive:'home' });
     });
 
     app.get('/login',(_req,res)=>{
