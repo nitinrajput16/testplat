@@ -561,3 +561,223 @@ module.exports={
     getSubmissionsForExam,
     getMySubmissions
 };
+
+// Update submission score (manual grading)
+const updateSubmissionScore = asyncHandler(async (req, res) => {
+    const { submissionId } = req.params;
+    const { score } = req.body;
+
+    if (!submissionId) {
+        return res.status(400).json({ message: 'Submission id is required.' });
+    }
+
+    const submission = await Submission.findById(submissionId);
+    if (!submission) {
+        return res.status(404).json({ message: 'Submission not found.' });
+    }
+
+    const exam = await Exam.findById(submission.exam);
+    if (!exam) {
+        return res.status(404).json({ message: 'Associated exam not found.' });
+    }
+
+    // Only exam creator or admin can update
+    if (!exam.createdBy.equals(req.user._id) && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'You cannot modify this submission.' });
+    }
+
+    const parsed = Number(score);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+        return res.status(400).json({ message: 'Score must be a non-negative number.' });
+    }
+
+    // Cap by question count if available
+    const questionCount = Array.isArray(submission.answers) ? submission.answers.length : 0;
+    if (questionCount && parsed > questionCount) {
+        return res.status(400).json({ message: `Score cannot exceed total questions (${questionCount}).` });
+    }
+
+    submission.score = parsed;
+    await submission.save();
+
+    // Optionally update session.finalScore if linked
+    if (submission.session) {
+        const session = await ExamSession.findById(submission.session);
+        if (session) {
+            session.finalScore = parsed;
+            await session.save();
+        }
+    }
+
+    res.json({ success: true, submissionId: submission._id, score: submission.score });
+});
+
+module.exports.updateSubmissionScore = updateSubmissionScore;
+
+// Update score for a specific answer (manual per-question grading)
+const updateSubmissionAnswerScore = asyncHandler(async (req, res) => {
+    const { submissionId, answerIndex } = req.params;
+    const { isCorrect } = req.body;
+
+    const idx = Number(answerIndex);
+    if (!submissionId || Number.isNaN(idx) || idx < 0) {
+        return res.status(400).json({ message: 'Invalid submission or answer index.' });
+    }
+
+    const submission = await Submission.findById(submissionId);
+    if (!submission) {
+        return res.status(404).json({ message: 'Submission not found.' });
+    }
+
+    const exam = await Exam.findById(submission.exam);
+    if (!exam) {
+        return res.status(404).json({ message: 'Associated exam not found.' });
+    }
+
+    // Only exam creator or admin can update
+    if (!exam.createdBy.equals(req.user._id) && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'You cannot modify this submission.' });
+    }
+
+    if (typeof isCorrect !== 'boolean') {
+        return res.status(400).json({ message: 'isCorrect must be boolean.' });
+    }
+
+    if (!Array.isArray(submission.answers) || idx >= submission.answers.length) {
+        return res.status(400).json({ message: 'Answer index out of range.' });
+    }
+
+    // Update the answer correctness
+    submission.answers[idx].isCorrect = isCorrect;
+
+    // Recalculate total score (count of correct answers)
+    let newScore = 0;
+    submission.answers.forEach((ans) => {
+        if (ans && typeof ans.isCorrect === 'boolean' && ans.isCorrect === true) newScore += 1;
+    });
+
+    submission.score = newScore;
+    await submission.save();
+
+    // If session exists, update finalScore
+    if (submission.session) {
+        const session = await ExamSession.findById(submission.session);
+        if (session) {
+            session.finalScore = newScore;
+            await session.save();
+        }
+    }
+
+    res.json({ success: true, submissionId: submission._id, answerIndex: idx, isCorrect, score: newScore });
+});
+
+module.exports.updateSubmissionAnswerScore = updateSubmissionAnswerScore;
+
+// Delete a submission (instructors / admins)
+const deleteSubmission = asyncHandler(async (req, res) => {
+    const { submissionId } = req.params;
+
+    if (!submissionId) {
+        return res.status(400).json({ message: 'Submission id is required.' });
+    }
+
+    const submission = await Submission.findById(submissionId);
+    if (!submission) {
+        return res.status(404).json({ message: 'Submission not found.' });
+    }
+
+    const exam = await Exam.findById(submission.exam);
+    if (!exam) {
+        return res.status(404).json({ message: 'Associated exam not found.' });
+    }
+
+    // Only exam creator or admin can delete
+    if (!exam.createdBy.equals(req.user._id) && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'You cannot delete this submission.' });
+    }
+
+    // If a session references this submission, clear reference and finalScore
+    if (submission.session) {
+        try {
+            const session = await ExamSession.findById(submission.session);
+            if (session) {
+                session.submission = null;
+                session.finalScore = null;
+                session.markModified('submission');
+                session.markModified('finalScore');
+                await session.save();
+            }
+        } catch (err) {
+            // non-fatal, continue with deletion
+            console.error('Failed to clear referenced session for deleted submission', err);
+        }
+    }
+
+    await Submission.deleteOne({ _id: submission._id });
+
+    res.json({ success: true, submissionId: submission._id });
+});
+
+module.exports.deleteSubmission = deleteSubmission;
+
+// Adjust scores for all submissions of an exam by a delta (can be negative)
+const adjustSubmissionScores = asyncHandler(async (req, res) => {
+    const { examId } = req.params;
+    const { delta } = req.body;
+
+    if (!examId) {
+        return res.status(400).json({ message: 'Exam id is required.' });
+    }
+
+    const parsedDelta = Number(delta);
+    if (!Number.isFinite(parsedDelta) || parsedDelta === 0) {
+        return res.status(400).json({ message: 'Delta must be a non-zero number.' });
+    }
+
+    const exam = await Exam.findById(examId);
+    if (!exam) {
+        return res.status(404).json({ message: 'Exam not found.' });
+    }
+
+    // Only exam creator or admin can adjust
+    if (!exam.createdBy.equals(req.user._id) && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'You cannot modify submissions for this exam.' });
+    }
+
+    // Fetch submissions for the exam
+    const submissions = await Submission.find({ exam: examId });
+    let updatedCount = 0;
+
+    for (const submission of submissions) {
+        const questionCount = Array.isArray(submission.answers) ? submission.answers.length : 0;
+        const current = Number(submission.score) || 0;
+        let next = current + parsedDelta;
+        if (next < 0) next = 0;
+        if (questionCount && next > questionCount) next = questionCount;
+        if (next !== current) {
+            submission.score = next;
+            try {
+                await submission.save();
+                // update session finalScore if present
+                if (submission.session) {
+                    try {
+                        const session = await ExamSession.findById(submission.session);
+                        if (session) {
+                            session.finalScore = next;
+                            await session.save();
+                        }
+                    } catch (err) {
+                        console.error('Failed to update session after adjusting scores', err);
+                    }
+                }
+                updatedCount += 1;
+            } catch (err) {
+                console.error('Failed to save adjusted submission', submission._id, err);
+            }
+        }
+    }
+
+    res.json({ success: true, updated: updatedCount, total: submissions.length, delta: parsedDelta });
+});
+
+module.exports.adjustSubmissionScores = adjustSubmissionScores;

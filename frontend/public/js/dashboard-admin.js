@@ -104,6 +104,9 @@ const submissionsList=document.getElementById('submissionsList');
 const submissionsEmpty=document.getElementById('submissionsEmpty');
 const submissionsLoading=document.getElementById('submissionsLoading');
 const refreshSubmissionsButton=document.getElementById('refreshSubmissionsButton');
+const submissionsSearch=document.getElementById('submissionsSearch');
+const globalDeltaInput=document.getElementById('globalDelta');
+const applyGlobalDeltaBtn=document.getElementById('applyGlobalDelta');
 const instructorNav=document.getElementById('instructorNav');
 const instructorTabButtons=Array.from(document.querySelectorAll('[data-instructor-page-target]'));
 const instructorPageElements=new Map();
@@ -786,7 +789,7 @@ function getAnswerStatusMeta(answer,question){
     return { label:'Pending review', variant:'warning' };
 }
 
-function createSubmissionAnswerDetails(answer,index,question){
+function createSubmissionAnswerDetails(answer,index,question,submission,onScoreUpdated){
     const details=document.createElement('details');
     details.className='submission-answer';
 
@@ -929,11 +932,82 @@ function createSubmissionAnswerDetails(answer,index,question){
         body.appendChild(fallbackParagraph);
     }
 
+    // Inline per-answer grading controls for instructors/admins
+    if(canManageExams){
+        const controls=document.createElement('div');
+        controls.className='answer-score-controls';
+
+        const markCorrectBtn=document.createElement('button');
+        markCorrectBtn.type='button';
+        markCorrectBtn.className='primary small';
+        markCorrectBtn.textContent='Mark correct';
+
+        const markIncorrectBtn=document.createElement('button');
+        markIncorrectBtn.type='button';
+        markIncorrectBtn.className='secondary small';
+        markIncorrectBtn.textContent='Mark incorrect';
+
+        const clearBtn=document.createElement('button');
+        clearBtn.type='button';
+        clearBtn.className='link-button small';
+        clearBtn.textContent='Clear';
+
+        controls.appendChild(markCorrectBtn);
+        controls.appendChild(document.createTextNode(' '));
+        controls.appendChild(markIncorrectBtn);
+        controls.appendChild(document.createTextNode(' '));
+        controls.appendChild(clearBtn);
+
+        // disable buttons based on current state
+        if(answer && answer.isCorrect===true){
+            markCorrectBtn.disabled=true;
+        }else if(answer && answer.isCorrect===false){
+            markIncorrectBtn.disabled=true;
+        }
+
+        async function setAnswerCorrectness(value){
+            try{
+                markCorrectBtn.disabled=markIncorrectBtn.disabled=clearBtn.disabled=true;
+                const resp = await request(`/api/submissions/${submission._id}/answer/${index}/score`, { method:'POST', body: { isCorrect: value } });
+                // update local answer and UI
+                if(!submission.answers) submission.answers = [];
+                if(!submission.answers[index]) submission.answers[index] = answer || {};
+                submission.answers[index].isCorrect = value;
+                // update badge in summary
+                const newBadge = getAnswerStatusMeta(submission.answers[index], question);
+                // find existing badge in summary and update
+                const existingBadge = summary.querySelector('.badge');
+                if(existingBadge){
+                    existingBadge.className = `badge ${newBadge.variant}`;
+                    existingBadge.textContent = newBadge.label;
+                }
+                // notify parent to update overall score display
+                if(typeof onScoreUpdated === 'function'){
+                    onScoreUpdated(resp.score);
+                }
+                setMessage('Answer updated','success');
+            }catch(err){
+                console.error(err);
+                setMessage(err.message || 'Failed to update answer score','error');
+            }finally{
+                markCorrectBtn.disabled=false;
+                markIncorrectBtn.disabled=false;
+                clearBtn.disabled=false;
+            }
+        }
+
+        markCorrectBtn.addEventListener('click',()=>setAnswerCorrectness(true));
+        markIncorrectBtn.addEventListener('click',()=>setAnswerCorrectness(false));
+        clearBtn.addEventListener('click',()=>setAnswerCorrectness(undefined));
+
+        body.appendChild(controls);
+    }
+
     details.appendChild(body);
     return details;
 }
 
-function createSubmissionCard(submission,questionMap,questionCount){
+    function createSubmissionCard(submission,questionMap,questionCount){
     const li=document.createElement('li');
     li.className='submission-card';
 
@@ -973,6 +1047,49 @@ function createSubmissionCard(submission,questionMap,questionCount){
         parts.push(`${percentage}%`);
     }
     scoreBlock.textContent=parts.join(' · ');
+
+    // Add manual edit button for instructors/admins
+    if(canManageExams){
+        const editScoreBtn=document.createElement('button');
+        editScoreBtn.type='button';
+        editScoreBtn.className='link-button edit-score-btn';
+        editScoreBtn.textContent='Edit score';
+        editScoreBtn.addEventListener('click',async()=>{
+            openScoreEditor(submission, scoreBlock, totalQuestions);
+        });
+        scoreBlock.appendChild(document.createTextNode(' '));
+        scoreBlock.appendChild(editScoreBtn);
+
+        // Delete submission button
+        const deleteBtn=document.createElement('button');
+        deleteBtn.type='button';
+        deleteBtn.className='link-button danger delete-submission-btn';
+        deleteBtn.textContent='Delete';
+        deleteBtn.addEventListener('click',async()=>{
+            if(!confirm('Delete this submission? This action cannot be undone.')) return;
+            try{
+                deleteBtn.disabled=true;
+                await request(`/api/submissions/${submission._id}`,{ method:'DELETE' });
+                // remove from cached list and UI
+                const examId = submission.exam;
+                const list = cachedSubmissions.get(examId) || [];
+                const remaining = list.filter((s)=>String(s._id) !== String(submission._id));
+                cachedSubmissions.set(examId, remaining);
+                // remove DOM node
+                li.remove();
+                setMessage('Submission deleted','success');
+                // refresh summary
+                const examObj = getExamById(examId);
+                renderSubmissionsSummary(examObj, remaining, questionCount);
+            }catch(err){
+                console.error(err);
+                setMessage(err.message || 'Failed to delete submission','error');
+                deleteBtn.disabled=false;
+            }
+        });
+        scoreBlock.appendChild(document.createTextNode(' '));
+        scoreBlock.appendChild(deleteBtn);
+    }
 
     if(manualReviewCount>0){
         const badge=document.createElement('span');
@@ -1061,7 +1178,15 @@ function createSubmissionCard(submission,questionMap,questionCount){
                 (typeof answer.question==='string'?answer.question:String(answer.question._id||answer.question))
                 : null;
             const question=questionId?questionMap.get(questionId)||null:null;
-            const answerDetails=createSubmissionAnswerDetails(answer,index,question);
+            const answerDetails=createSubmissionAnswerDetails(answer,index,question,submission,(newScore)=>{
+                // update cached submission score and UI
+                submission.score = newScore;
+                const rawScore = Number(newScore) || 0;
+                const percentage = questionCount ? Math.round((rawScore/questionCount)*100) : null;
+                const parts = [`Score: ${rawScore}${questionCount?` / ${questionCount}`:''}`];
+                if(Number.isFinite(percentage)) parts.push(`${percentage}%`);
+                if(scoreBlock.firstChild) scoreBlock.firstChild.textContent = parts.join(' · ');
+            });
             answersContainer.appendChild(answerDetails);
         });
     }
@@ -1070,12 +1195,90 @@ function createSubmissionCard(submission,questionMap,questionCount){
     return li;
 }
 
+// Score editor helper
+async function openScoreEditor(submission, scoreBlock, totalQuestions){
+    if(!submission) return;
+
+    // Prevent multiple editors
+    if(scoreBlock.querySelector('.score-editor')) return;
+
+    const currentScore = Number(submission.score) || 0;
+
+    const editor = document.createElement('span');
+    editor.className = 'score-editor';
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = '0';
+    if(totalQuestions) input.max = String(totalQuestions);
+    input.value = String(currentScore);
+    input.style.width = '80px';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'primary small';
+    saveBtn.textContent = 'Save';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'secondary small';
+    cancelBtn.textContent = 'Cancel';
+
+    editor.appendChild(input);
+    editor.appendChild(document.createTextNode(' '));
+    editor.appendChild(saveBtn);
+    editor.appendChild(document.createTextNode(' '));
+    editor.appendChild(cancelBtn);
+
+    scoreBlock.appendChild(document.createTextNode(' '));
+    scoreBlock.appendChild(editor);
+
+    cancelBtn.addEventListener('click',()=>{ editor.remove(); });
+
+    saveBtn.addEventListener('click', async ()=>{
+        const val = Number(input.value);
+        if(!Number.isFinite(val) || val < 0){
+            setMessage('Enter a valid non-negative number for score.','error');
+            return;
+        }
+        if(totalQuestions && val > totalQuestions){
+            setMessage(`Score cannot exceed total questions (${totalQuestions}).`,'error');
+            return;
+        }
+
+        try{
+            saveBtn.disabled = true;
+            const resp = await request(`/api/submissions/${submission._id}/score`,{ method:'POST', body:{ score: val } });
+            // Update UI
+            submission.score = val;
+            const percentage = totalQuestions ? Math.round((val/totalQuestions)*100) : null;
+            const parts = [`Score: ${val}${totalQuestions?` / ${totalQuestions}`:''}`];
+            if(Number.isFinite(percentage)) parts.push(`${percentage}%`);
+            scoreBlock.firstChild.textContent = parts.join(' · ');
+            setMessage('Score updated','success');
+            editor.remove();
+        }catch(error){
+            setMessage(error.message || 'Failed to update score','error');
+            saveBtn.disabled = false;
+        }
+    });
+}
+
 async function renderSubmissions(examId){
     if(!submissionsPanel){
         return;
     }
 
-    const submissions=cachedSubmissions.get(examId)||[];
+    // Apply search filter if present
+    const allSubmissions=cachedSubmissions.get(examId)||[];
+    const query=(submissionsSearch?.value||'').trim().toLowerCase();
+    const submissions = query
+        ? allSubmissions.filter((s)=>{
+            const name=(s?.student?.name||'').toLowerCase();
+            const email=(s?.student?.email||'').toLowerCase();
+            return name.includes(query) || email.includes(query);
+        })
+        : allSubmissions;
     const exam=getExamById(examId);
     const questionMap=await ensureQuestionMap(examId);
     const questionCount=questionMap.size || exam?.questions?.length || 0;
@@ -3312,6 +3515,56 @@ function initialize(){
             fetchOrganizations();
         }
         fetchMyExams();
+    }
+
+    // Wire search input for submissions
+    if(submissionsSearch){
+        let searchTimer=null;
+        submissionsSearch.addEventListener('input',()=>{
+            clearTimeout(searchTimer);
+            searchTimer=setTimeout(()=>{
+                if(activeSubmissionsExamId){
+                    renderSubmissions(activeSubmissionsExamId);
+                }
+            },250);
+        });
+    }
+
+    // Wire global delta apply
+    if(applyGlobalDeltaBtn && globalDeltaInput){
+        applyGlobalDeltaBtn.addEventListener('click', async ()=>{
+            if(!activeSubmissionsExamId){
+                setMessage('Select an exam first.','error');
+                return;
+            }
+            const raw = Number(globalDeltaInput.value);
+            if(!Number.isFinite(raw) || raw===0){
+                setMessage('Enter a non-zero numeric delta. Use negative values to subtract.','error');
+                return;
+            }
+            if(!confirm(`Apply ${raw>0?'+':''}${raw} marks to all submissions for this exam?`)) return;
+            try{
+                applyGlobalDeltaBtn.disabled=true;
+                const resp = await request(`/api/submissions/exam/${activeSubmissionsExamId}/adjust`, { method:'POST', body:{ delta: raw } });
+                // Update cached submissions in-place
+                const list = cachedSubmissions.get(activeSubmissionsExamId) || [];
+                const updated = list.map((s)=>{
+                    const questionCount = Array.isArray(s.answers)?s.answers.length:0;
+                    let newScore = (Number(s.score)||0) + raw;
+                    if(newScore<0) newScore = 0;
+                    if(questionCount && newScore>questionCount) newScore = questionCount;
+                    return { ...s, score: newScore };
+                });
+                cachedSubmissions.set(activeSubmissionsExamId, updated);
+                await renderSubmissions(activeSubmissionsExamId);
+                setMessage(`Adjusted ${resp.updated||0} of ${resp.total||updated.length} submissions by ${resp.delta}.`,'success');
+            }catch(err){
+                console.error(err);
+                setMessage(err.message || 'Failed to apply global delta','error');
+            }finally{
+                applyGlobalDeltaBtn.disabled=false;
+            }
+        });
     }
 }
 

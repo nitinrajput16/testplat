@@ -21,6 +21,14 @@
     grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
     gap:24px;
 }
+select, select option {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #333;
+}
+select:focus {
+    outline: 2px solid #fff;
+}
 
 .card{
     background-color:#ffffff;
