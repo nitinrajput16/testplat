@@ -12,6 +12,7 @@ const { notFoundHandler, errorHandler }=require('./middleware/errorHandler');
 const organizationRoutes=require('./routes/organizationRoutes');
 const adminRoutes=require('./routes/adminRoutes');
 const codeExecutionRoutes=require('./routes/codeExecutionRoutes');
+const teacherRequestRoutes=require('./routes/teacherRequestRoutes');
 const { apiRateLimiter }=require('./middleware/rateLimiter');
 
 const app=express();
@@ -50,6 +51,7 @@ app.use('/api/organizations',organizationRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/code',codeExecutionRoutes);
 app.use('/api/users',userRoutes);
+app.use('/api/teacher-requests',teacherRequestRoutes);
 
 if(hasViewsDir){
     app.get('/',(_req,res)=>{

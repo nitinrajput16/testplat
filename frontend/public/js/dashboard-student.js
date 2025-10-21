@@ -293,11 +293,11 @@ function renderUpcomingExams() {
         startButton.type = 'button';
         startButton.dataset.action = 'start-exam';
         startButton.dataset.examId = exam._id;
-        startButton.textContent = 'Start exam';
+        startButton.textContent = 'Start';
 
         if (hasStudentAttemptedExam(exam)) {
             startButton.disabled = true;
-            startButton.textContent = 'Attempt recorded';
+            startButton.textContent = 'Attempted';
             startButton.classList.add('secondary');
         }
 

@@ -22,6 +22,7 @@ if(currentUser.role!=='admin' && currentUser.role!=='instructor'){
 const API={
     organizations:'/api/organizations',
     teachers:'/api/admin/teachers',
+    teacherRequests:'/api/admin/teacher-requests',
     exams:'/api/exams',
     questions:'/api/questions',
     assignTeacher:(orgId,teacherId)=>`/api/organizations/${orgId}/teachers/${teacherId}`,
@@ -94,6 +95,8 @@ const organizationSearchInput=document.getElementById('organizationSearch');
 const teacherList=document.getElementById('teacherList');
 const teacherSearchInput=document.getElementById('teacherSearch');
 const teacherEmpty=document.getElementById('teacherEmpty');
+const teacherRequestsList=document.getElementById('teacherRequestsList');
+const teacherRequestsEmpty=document.getElementById('teacherRequestsEmpty');
 const myExamsList=document.getElementById('myExams');
 const myExamsEmpty=document.getElementById('myExamsEmpty');
 const submissionsPanel=document.getElementById('submissionsPanel');
@@ -104,9 +107,6 @@ const submissionsList=document.getElementById('submissionsList');
 const submissionsEmpty=document.getElementById('submissionsEmpty');
 const submissionsLoading=document.getElementById('submissionsLoading');
 const refreshSubmissionsButton=document.getElementById('refreshSubmissionsButton');
-const submissionsSearch=document.getElementById('submissionsSearch');
-const globalDeltaInput=document.getElementById('globalDelta');
-const applyGlobalDeltaBtn=document.getElementById('applyGlobalDelta');
 const instructorNav=document.getElementById('instructorNav');
 const instructorTabButtons=Array.from(document.querySelectorAll('[data-instructor-page-target]'));
 const instructorPageElements=new Map();
@@ -1059,36 +1059,6 @@ function createSubmissionAnswerDetails(answer,index,question,submission,onScoreU
         });
         scoreBlock.appendChild(document.createTextNode(' '));
         scoreBlock.appendChild(editScoreBtn);
-
-        // Delete submission button
-        const deleteBtn=document.createElement('button');
-        deleteBtn.type='button';
-        deleteBtn.className='link-button danger delete-submission-btn';
-        deleteBtn.textContent='Delete';
-        deleteBtn.addEventListener('click',async()=>{
-            if(!confirm('Delete this submission? This action cannot be undone.')) return;
-            try{
-                deleteBtn.disabled=true;
-                await request(`/api/submissions/${submission._id}`,{ method:'DELETE' });
-                // remove from cached list and UI
-                const examId = submission.exam;
-                const list = cachedSubmissions.get(examId) || [];
-                const remaining = list.filter((s)=>String(s._id) !== String(submission._id));
-                cachedSubmissions.set(examId, remaining);
-                // remove DOM node
-                li.remove();
-                setMessage('Submission deleted','success');
-                // refresh summary
-                const examObj = getExamById(examId);
-                renderSubmissionsSummary(examObj, remaining, questionCount);
-            }catch(err){
-                console.error(err);
-                setMessage(err.message || 'Failed to delete submission','error');
-                deleteBtn.disabled=false;
-            }
-        });
-        scoreBlock.appendChild(document.createTextNode(' '));
-        scoreBlock.appendChild(deleteBtn);
     }
 
     if(manualReviewCount>0){
@@ -1269,16 +1239,7 @@ async function renderSubmissions(examId){
         return;
     }
 
-    // Apply search filter if present
-    const allSubmissions=cachedSubmissions.get(examId)||[];
-    const query=(submissionsSearch?.value||'').trim().toLowerCase();
-    const submissions = query
-        ? allSubmissions.filter((s)=>{
-            const name=(s?.student?.name||'').toLowerCase();
-            const email=(s?.student?.email||'').toLowerCase();
-            return name.includes(query) || email.includes(query);
-        })
-        : allSubmissions;
+    const submissions=cachedSubmissions.get(examId)||[];
     const exam=getExamById(examId);
     const questionMap=await ensureQuestionMap(examId);
     const questionCount=questionMap.size || exam?.questions?.length || 0;
@@ -1949,7 +1910,7 @@ function renderTeachers(){
             removeBtn.type='button';
             removeBtn.dataset.action='remove-teacher';
             removeBtn.dataset.teacherId=teacher._id;
-            removeBtn.textContent='Deactivate';
+            removeBtn.textContent='🗑️';
             actions.appendChild(removeBtn);
         }
 
@@ -1966,6 +1927,81 @@ function renderTeachers(){
             teacherEmpty.classList.add('hidden');
         }
     }
+}
+
+async function loadTeacherRequests(){
+    if(!teacherRequestsList) return;
+    teacherRequestsList.innerHTML='';
+    try{
+        const reqs=await request(API.teacherRequests);
+        const pending=(Array.isArray(reqs)?reqs:[]).filter((r)=>r.status==='pending');
+        if(!pending.length){
+            teacherRequestsEmpty?.classList.remove('hidden');
+            return;
+        }
+        teacherRequestsEmpty?.classList.add('hidden');
+        pending.forEach((r)=>{
+            const li=document.createElement('li');
+            li.className='list-item';
+            const info=document.createElement('div');
+            info.innerHTML=`<strong>${escapeHtml(r.user?.name||r.user?.email||'Unknown')}</strong><div class="muted small">${escapeHtml(r.user?.email||'')}</div>`;
+            li.appendChild(info);
+            const actions=document.createElement('div');
+            actions.className='actions-row';
+            const approve=document.createElement('button');
+            approve.type='button';
+            approve.className='primary small';
+            approve.textContent='✔';
+            approve.title = 'Approve request';
+            approve.setAttribute('aria-label','Approve request');
+            const reject=document.createElement('button');
+            reject.type='button';
+            reject.className='secondary small';
+            reject.textContent='✖';
+            reject.title = 'Reject request';
+            reject.setAttribute('aria-label','Reject request');
+            actions.appendChild(approve);
+            actions.appendChild(document.createTextNode(' '));
+            actions.appendChild(reject);
+            li.appendChild(actions);
+
+            approve.addEventListener('click',async ()=>{
+                try{
+                    approve.disabled=true; reject.disabled=true;
+                    await request(`${API.teacherRequests}/${r._id}`,{ method:'POST', body:{ action:'approve' } });
+                    li.remove();
+                    setMessage('Request approved','success');
+                }catch(err){
+                    console.error(err);
+                    setMessage(err.message||'Failed to approve','error');
+                    approve.disabled=false; reject.disabled=false;
+                }
+            });
+
+            reject.addEventListener('click',async ()=>{
+                try{
+                    approve.disabled=true; reject.disabled=true;
+                    await request(`${API.teacherRequests}/${r._id}`,{ method:'POST', body:{ action:'reject' } });
+                    li.remove();
+                    setMessage('Request rejected','success');
+                }catch(err){
+                    console.error(err);
+                    setMessage(err.message||'Failed to reject','error');
+                    approve.disabled=false; reject.disabled=false;
+                }
+            });
+
+            teacherRequestsList.appendChild(li);
+        });
+    }catch(error){
+        console.error('Failed to load teacher requests',error);
+        setMessage(error.message||'Unable to load requests','error');
+    }
+}
+
+function escapeHtml(str){
+    if(!str) return '';
+    return String(str).replace(/[&<>"]/g,(c)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]);
 }
 
 function renderTeacherOptions(){
@@ -3515,56 +3551,10 @@ function initialize(){
             fetchOrganizations();
         }
         fetchMyExams();
-    }
-
-    // Wire search input for submissions
-    if(submissionsSearch){
-        let searchTimer=null;
-        submissionsSearch.addEventListener('input',()=>{
-            clearTimeout(searchTimer);
-            searchTimer=setTimeout(()=>{
-                if(activeSubmissionsExamId){
-                    renderSubmissions(activeSubmissionsExamId);
-                }
-            },250);
-        });
-    }
-
-    // Wire global delta apply
-    if(applyGlobalDeltaBtn && globalDeltaInput){
-        applyGlobalDeltaBtn.addEventListener('click', async ()=>{
-            if(!activeSubmissionsExamId){
-                setMessage('Select an exam first.','error');
-                return;
-            }
-            const raw = Number(globalDeltaInput.value);
-            if(!Number.isFinite(raw) || raw===0){
-                setMessage('Enter a non-zero numeric delta. Use negative values to subtract.','error');
-                return;
-            }
-            if(!confirm(`Apply ${raw>0?'+':''}${raw} marks to all submissions for this exam?`)) return;
-            try{
-                applyGlobalDeltaBtn.disabled=true;
-                const resp = await request(`/api/submissions/exam/${activeSubmissionsExamId}/adjust`, { method:'POST', body:{ delta: raw } });
-                // Update cached submissions in-place
-                const list = cachedSubmissions.get(activeSubmissionsExamId) || [];
-                const updated = list.map((s)=>{
-                    const questionCount = Array.isArray(s.answers)?s.answers.length:0;
-                    let newScore = (Number(s.score)||0) + raw;
-                    if(newScore<0) newScore = 0;
-                    if(questionCount && newScore>questionCount) newScore = questionCount;
-                    return { ...s, score: newScore };
-                });
-                cachedSubmissions.set(activeSubmissionsExamId, updated);
-                await renderSubmissions(activeSubmissionsExamId);
-                setMessage(`Adjusted ${resp.updated||0} of ${resp.total||updated.length} submissions by ${resp.delta}.`,'success');
-            }catch(err){
-                console.error(err);
-                setMessage(err.message || 'Failed to apply global delta','error');
-            }finally{
-                applyGlobalDeltaBtn.disabled=false;
-            }
-        });
+        // load teacher requests for admins
+        if(isAdmin){
+            loadTeacherRequests();
+        }
     }
 }
 

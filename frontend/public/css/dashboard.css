@@ -117,11 +117,32 @@ form .actions button{
 .card .search-field input{
     margin-top:4px;
     width:100%;
+    padding:8px 10px;
+    border:1px solid #cfd8dc;
+    border-radius:6px;
+    background: transparent;
+    color: #546e7a;
 }
 .scrollable-list{
     max-height:320px;
     overflow-y:auto;
     padding-right:8px;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4e4e4e #1e1e1e;
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #4e4e4e;
+  border-radius: 6px;
 }
 .scrollable-list .list{
     margin-bottom:0;
@@ -347,7 +368,7 @@ button.secondary:hover{
     color:#607d8b;
 }
 .small{
-    font-size:12px;
+    font-size:10px;
 }
 #readyExamDetails h3{
     margin:0;
@@ -458,24 +479,6 @@ button.secondary:hover{
     display:flex;
     gap:8px;
     flex-wrap:wrap;
-}
-
-#submissionsSearch{
-    padding:4px 5px;
-    border:1px solid #cfd8dc;
-    border-radius:999px;
-    font-size:14px;
-    width:220px;
-    background: #37474f;
-}
-
-#globalDelta{
-    padding:4px 5px;
-    border:1px solid #cfd8dc;
-    border-radius:999px;
-    font-size:14px;
-    width:80px;
-    background: #37427f;
 }
 
 .submissions-list{

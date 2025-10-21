@@ -25,6 +25,8 @@ const profileSubheading=document.getElementById('profileSubheading');
 
 const profileUpdateForm=document.getElementById('profileUpdateForm');
 const passwordUpdateForm=document.getElementById('passwordUpdateForm');
+const becomeTeacherBtn=document.getElementById('becomeTeacherBtn');
+const becomeTeacherNote=document.getElementById('becomeTeacherNote');
 const profileNameInput=document.getElementById('profileNameInput');
 const profileEmailInput=document.getElementById('profileEmailInput');
 const profileOrganizationsField=document.getElementById('profileOrganizationsField');
@@ -289,6 +291,17 @@ function renderProfile({ user, meta }){
         profileOrganizationsField.classList.add('hidden');
     }
 
+    // Show or hide become-teacher action for students
+    if(becomeTeacherBtn){
+        if(profile.role==='student'){
+            becomeTeacherBtn.classList.remove('hidden');
+            becomeTeacherNote?.classList.add('hidden');
+        }else{
+            becomeTeacherBtn.classList.add('hidden');
+            becomeTeacherNote?.classList.add('hidden');
+        }
+    }
+
     const localUser={
         ...profile,
         meta
@@ -397,3 +410,21 @@ passwordUpdateForm?.addEventListener('submit',async (event)=>{
 });
 
 loadProfile();
+
+// Handle become teacher request
+becomeTeacherBtn?.addEventListener('click',async ()=>{
+    if(!confirm('Submit a request to become a teacher? An administrator will review it.')){
+        return;
+    }
+    try{
+        becomeTeacherBtn.disabled=true;
+        const resp=await request('/api/teacher-requests',{ method:'POST', body:{ message:'' } });
+        becomeTeacherNote?.classList.remove('hidden');
+        setMessage('Teacher request submitted.','success');
+    }catch(error){
+        console.error('Teacher request failed',error);
+        setMessage(error.message || 'Failed to submit request.','error');
+    }finally{
+        becomeTeacherBtn.disabled=false;
+    }
+});
