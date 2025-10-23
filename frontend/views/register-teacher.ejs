@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <%- include('partials/head', { pageTitle: 'Login' }) %>
+    <%- include('partials/head', { pageTitle: 'Register as Teacher' }) %>
     <style>
         main{
-            max-width:480px;
+            max-width:520px;
             margin:40px auto;
             padding:32px;
             background-color:#ffffff;
@@ -23,29 +23,14 @@
         label{
             font-weight:600;
         }
+        input[type="text"],
         input[type="email"],
-        input[type="password"],
-        select{
+        input[type="password"]{
             width:100%;
             padding:10px 12px;
             border:1px solid #cfd8dc;
             border-radius:6px;
             font-size:16px;
-        }
-        .role-select{
-            display:flex;
-            gap:12px;
-            align-items:center;
-        }
-        .role-select label{
-            font-weight:500;
-        }
-        .roles{
-            display:flex;
-            gap:12px;
-        }
-        .roles input{
-            margin-right:6px;
         }
         .alert{
             display:none;
@@ -80,12 +65,16 @@
     <link rel="stylesheet" href="/css/theme-modern.css">
 </head>
 <body>
-    <%- include('partials/navbar', { navActive: 'login' }) %>
+    <%- include('partials/navbar', { navActive: 'register' }) %>
 
     <main>
-        <h1>Sign in to Exam Platform</h1>
+        <h1>Register as a Teacher</h1>
         <div id="message" class="alert"></div>
-        <form id="loginForm">
+        <form id="registerTeacherForm">
+            <div>
+                <label for="name">Full name</label>
+                <input type="text" id="name" name="name" placeholder="Alex Johnson" required>
+            </div>
             <div>
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="you@example.com" required>
@@ -94,29 +83,19 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Minimum 8 characters" required minlength="8">
             </div>
-            <fieldset class="role-select">
-                <legend>Login as</legend>
-                <div class="roles">
-                    <label><input type="radio" name="role" value="student" checked> Student</label>
-                    <label><input type="radio" name="role" value="instructor"> Instructor</label>
-                    <label><input type="radio" name="role" value="admin"> Admin</label>
-                </div>
-            </fieldset>
-            <div class="actions">
-                <button type="submit">Log In</button>
-                <div style="display:flex;gap:8px;">
-                    <button type="button" id="registerButton" class="secondary" style="flex:1">Register as Student</button>
-                    <button type="button" id="registerTeacherButton" class="secondary" style="flex:1">Register as Teacher</button>
-                </div>
+            <div>
+                <label for="message">Message for the admin (optional)</label>
+                <input type="text" id="messageInput" name="message" placeholder="Briefly describe why you want to be a teacher">
             </div>
-            <div style="margin-top:8px; text-align:right;">
-                <a href="/forgot-password" id="forgotLink">Forgot password?</a>
+            <div class="actions">
+                <button type="submit">Submit Request</button>
+                <button type="button" id="backToLogin" class="secondary">Back to Login</button>
             </div>
         </form>
-        <p class="switch">Need instructor or admin access? Contact the platform administrator to upgrade your account.</p>
+        <p class="switch">After approval, you will be granted instructor access. <a href="/login">Back to login</a>.</p>
     </main>
 
     <%- include('partials/footer') %>
-    <script src="/js/login.js"></script>
+    <script src="/js/register-teacher.js"></script>
 </body>
 </html>

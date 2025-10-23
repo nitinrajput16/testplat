@@ -56,10 +56,11 @@
                         <label for="profileEmailInput">Email address</label>
                         <input type="email" id="profileEmailInput" name="email" autocomplete="email" required>
                     </div>
-                    <div class="field hidden" id="profileOrganizationsField">
+                    <div class="field" id="profileOrganizationsField">
                         <label for="profileOrganizationsSelect">Organizations</label>
-                        <select id="profileOrganizationsSelect" name="organizationIds" multiple></select>
-                        <p id="profileOrganizationsHint" class="muted small">Hold Ctrl (or Cmd on Mac) to select multiple organizations.</p>
+                        <!-- `multiple` is toggled by client-side JS depending on role (admin: multiple, instructor: single) -->
+                        <select id="profileOrganizationsSelect" name="organizationIds"></select>
+                        <p id="profileOrganizationsHint" class="muted small">Select your organization(s).</p>
                     </div>
                     <div class="actions">
                         <button type="submit">Save changes</button>
@@ -89,6 +90,8 @@
                 </form>
             </article>
 
+            <% /* Only show 'Become a teacher' to students or unauthenticated users */ %>
+            <% if(typeof currentUser === 'undefined' || !currentUser || currentUser.role === 'student'){ %>
             <article class="card profile-teacher-card">
                 <h2>Become a teacher</h2>
                 <div class="muted small">If you'd like to teach on this platform, submit a request. An administrator will review and approve your request.</div>
@@ -97,6 +100,7 @@
                     <p id="becomeTeacherNote" class="muted small hidden">Request submitted. Awaiting admin approval.</p>
                 </div>
             </article>
+            <% } %>
         </section>
     </main>
 

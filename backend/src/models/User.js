@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 const bcrypt=require('bcryptjs');
 
-const ROLES=['admin','instructor','student','org_admin'];
+const ROLES=['admin','instructor','student'];
 
 const userSchema=new mongoose.Schema({
     name:{

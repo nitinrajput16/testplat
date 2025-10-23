@@ -21,13 +21,23 @@
     grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
     gap:24px;
 }
-select, select option {
-    background-color: #000;
-    color: #fff;
-    border: 1px solid #333;
+/* Use .field select rules below for consistent dropdown styling */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4e4e4e #1e1e1e;
 }
-select:focus {
-    outline: 2px solid #fff;
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #4e4e4e;
+  border-radius: 6px;
 }
 
 .card{
@@ -142,6 +152,33 @@ select:focus {
 .field select[multiple]{
     min-height:120px;
 }
+
+/* Make the organization select match other dropdowns */
+#profileOrganizationsSelect{
+    width:100%;
+    /* padding:10px 12px; */
+    border:1px solid #cfd8dc;
+    border-radius:8px;
+    background: color #373737;
+    color: #e3f2fd;
+    font-size:0.95rem;
+}
+
+#profileOrganizationsSelect:focus{
+    outline:none;
+    border-color:#0077cc;
+    box-shadow:0 0 0 2px rgba(0,119,204,0.2);
+}
+
+/* when multiple, ensure scrollbar matches theme */
+#profileOrganizationsSelect[multiple]{
+    min-height:120px;
+    overflow:auto;
+}
+
+#profileOrganizationsSelect::-webkit-scrollbar{ width:8px }
+#profileOrganizationsSelect::-webkit-scrollbar-track{ background:#373737 }
+#profileOrganizationsSelect::-webkit-scrollbar-thumb{ background:#263238; border-radius:6px }
 
 .alert.hidden{
     display:none !important;

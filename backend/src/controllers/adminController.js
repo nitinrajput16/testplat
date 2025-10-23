@@ -49,7 +49,15 @@ const createTeacher=asyncHandler(async (req,res)=>{
         }
 
         teacher.organizations=[organizationId];
-        await teacher.save();
+        try{
+            await teacher.save();
+        }catch(err){
+            // duplicate key (race) - map to 409
+            if(err && err.code===11000 && err.keyPattern && err.keyPattern.email){
+                return res.status(409).json({ message:'An account with this email already exists.' });
+            }
+            throw err;
+        }
 
         organization.teachers.push(teacher._id);
         await organization.save();
@@ -60,7 +68,14 @@ const createTeacher=asyncHandler(async (req,res)=>{
         return res.status(201).json(populatedTeacher);
     }
 
-    await teacher.save();
+    try{
+        await teacher.save();
+    }catch(err){
+        if(err && err.code===11000 && err.keyPattern && err.keyPattern.email){
+            return res.status(409).json({ message:'An account with this email already exists.' });
+        }
+        throw err;
+    }
     const createdTeacher=await User.findById(teacher._id)
         .select('-password')
         .populate('organizations','name');

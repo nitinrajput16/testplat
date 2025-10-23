@@ -65,6 +65,33 @@ const register=asyncHandler(async (req,res)=>{
     });
 });
 
+// Register a teacher request: create user with role 'student' or 'instructor' but create a teacher request
+const registerTeacher=asyncHandler(async (req,res)=>{
+    const name=sanitizeString(req.body.name);
+    const email=req.body.email?.toLowerCase();
+    const password=req.body.password;
+
+    if(!name) return res.status(400).json({ message:'Name is required.' });
+    if(!isValidEmail(email)) return res.status(400).json({ message:'A valid email is required.' });
+    if(!validatePassword(password)) return res.status(400).json({ message:'Password must be at least 8 characters.' });
+
+    const existingUser=await User.findOne({ email });
+    if(existingUser){
+        return res.status(409).json({ message:'An account with this email already exists.' });
+    }
+
+    // create user as student by default; instructor role will be granted by admin when they approve the request
+    const user=await User.create({ name, email, password, role: 'student' });
+
+    // create a teacher request for admin review
+    const TeacherRequest = require('../models/TeacherRequest');
+    await TeacherRequest.create({ user: user._id, message: req.body.message || '' });
+
+    const token=generateToken(user);
+
+    res.status(201).json({ user, token, message:'Teacher registration submitted. An administrator will review your request.' });
+});
+
 const login=asyncHandler(async (req,res)=>{
     const email=req.body.email?.toLowerCase();
     const password=req.body.password;
@@ -142,7 +169,9 @@ const resetPassword=asyncHandler(async (req,res)=>{
 
 module.exports={
     register,
+    registerTeacher,
     login,
     forgotPassword,
     resetPassword
 };
+

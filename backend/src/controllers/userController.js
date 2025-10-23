@@ -78,9 +78,7 @@ const updateCurrentProfile=asyncHandler(async (req,res)=>{
             .filter(Boolean);
         const uniqueOrganizationIds=[...new Set(organizationIds)];
 
-        if(user.role==='instructor' && uniqueOrganizationIds.length>1){
-            return res.status(400).json({ message:'Instructors can belong to only one organization.' });
-        }
+        // Instructors are allowed to belong to multiple organizations now.
 
         if(uniqueOrganizationIds.length){
             const organizations=await Organization.find({ _id:{ $in:uniqueOrganizationIds } }).select('_id');

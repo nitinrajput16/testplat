@@ -24,13 +24,6 @@ const organizationSchema=new mongoose.Schema({
         }],
         default:[]
     }
-    ,admins:{
-        type:[{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:'User'
-        }],
-        default:[]
-    }
 },{
     timestamps:true
 });

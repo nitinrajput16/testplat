@@ -1,10 +1,7 @@
 const loginForm=document.getElementById('loginForm');
 const messageBox=document.getElementById('message');
 const registerButton=document.getElementById('registerButton');
-const forgotRequestBtn=document.getElementById('forgotRequestBtn');
-const forgotConfirmBtn=document.getElementById('forgotConfirmBtn');
-const forgotEmailInput=document.getElementById('forgotEmail');
-const forgotResponse=document.getElementById('forgotResponse');
+const registerTeacherButton=document.getElementById('registerTeacherButton');
 const yearSpan=document.getElementById('year');
 
 if(yearSpan){
@@ -78,52 +75,10 @@ function redirectToRegistration(){
     window.location.href='/register';
 }
 
+function redirectToTeacherRegistration(){
+    window.location.href='/register-teacher';
+}
+
 loginForm?.addEventListener('submit',login);
 registerButton?.addEventListener('click',redirectToRegistration);
-
-forgotRequestBtn?.addEventListener('click',async ()=>{
-    const email=(forgotEmailInput?.value||'').trim().toLowerCase();
-    if(!email){
-        forgotResponse.textContent='Enter your email above.';
-        return;
-    }
-    try{
-        forgotRequestBtn.disabled=true;
-        const resp=await fetch('/api/auth/password/request',{ method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ email }) });
-        const data=await resp.json();
-        if(!resp.ok){
-            forgotResponse.textContent=data.message||'Request failed.';
-        }else{
-            // token is returned for testing; show short message + token if provided
-            forgotResponse.textContent=data.resetToken?`Reset token: ${data.resetToken}`:data.message||'Reset token issued.';
-        }
-    }catch(err){
-        console.error(err);
-        forgotResponse.textContent='Failed to reach server.';
-    }finally{ forgotRequestBtn.disabled=false; }
-});
-
-forgotConfirmBtn?.addEventListener('click',async ()=>{
-    const token=prompt('Enter the reset token you received:');
-    if(!token){
-        return;
-    }
-    const newPass=prompt('Enter your new password (minimum 8 chars):');
-    if(!newPass || newPass.length<8){
-        alert('Password must be at least 8 characters.');
-        return;
-    }
-    try{
-        forgotConfirmBtn.disabled=true;
-        const resp=await fetch('/api/auth/password/confirm',{ method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ token, password: newPass }) });
-        const data=await resp.json();
-        if(!resp.ok){
-            alert(data.message||'Failed to reset password.');
-        }else{
-            alert('Password reset successful. You can now login with your new password.');
-        }
-    }catch(err){
-        console.error(err);
-        alert('Failed to reach server.');
-    }finally{ forgotConfirmBtn.disabled=false; }
-});
+registerTeacherButton?.addEventListener('click',redirectToTeacherRegistration);

@@ -74,6 +74,10 @@ if(hasViewsDir){
         res.render('register',{ pageTitle:'Register', navActive:'register' });
     });
 
+    app.get('/register-teacher',(_req,res)=>{
+        res.render('register-teacher',{ pageTitle:'Register as Teacher', navActive:'register' });
+    });
+
     app.get('/forgot-password',(_req,res)=>{
         res.render('forgot-password',{ pageTitle:'Forgot Password', navActive:'login' });
     });
