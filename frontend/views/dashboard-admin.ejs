@@ -107,6 +107,26 @@
                         <p id="teacherRequestsEmpty" class="empty-state hidden">No pending requests.</p>
                     </div>
                 </article>
+
+                <article class="card">
+                    <h2>Users</h2>
+                    <div class="field search-field">
+                        <label for="adminUserSearch">Search users</label>
+                        <input id="adminUserSearch" type="search" placeholder="Filter by name or email">
+                    </div>
+                    <div class="field">
+                        <label for="adminUserRoleFilter">Filter by role</label>
+                        <select id="adminUserRoleFilter">
+                            <option value="all">All roles</option>
+                            <option value="instructor">Instructor</option>
+                            <option value="student">Student</option>
+                        </select>
+                    </div>
+                    <div class="scrollable-list">
+                        <ul id="adminUsersList" class="list"></ul>
+                        <p id="adminUsersEmpty" class="empty-state hidden">No users found.</p>
+                    </div>
+                </article>
             </div>
         </section>
 

@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 const bcrypt=require('bcryptjs');
 
-const ROLES=['admin','instructor','student'];
+const ROLES=['admin','instructor','student','org_admin'];
 
 const userSchema=new mongoose.Schema({
     name:{
@@ -39,6 +39,12 @@ const userSchema=new mongoose.Schema({
     }
 },{
     timestamps:true
+});
+
+// Fields used for password reset tokens (one-time use)
+userSchema.add({
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date }
 });
 
 userSchema.pre('save',async function(next){

@@ -25,4 +25,21 @@ router
     .route('/teacher-requests/:id')
     .post(teacherRequestController.processRequest);
 
+// Admin user management
+router
+    .route('/users')
+    .get(adminController.listUsers);
+
+router
+    .route('/users/:id/role')
+    .post(adminController.updateUserRole);
+
+router
+    .route('/users/:id/active')
+    .post(adminController.setUserActive);
+
+router
+    .route('/users/:id/reset-password')
+    .post(adminController.resetUserPassword);
+
 module.exports=router;

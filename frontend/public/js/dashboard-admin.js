@@ -97,6 +97,8 @@ const teacherSearchInput=document.getElementById('teacherSearch');
 const teacherEmpty=document.getElementById('teacherEmpty');
 const teacherRequestsList=document.getElementById('teacherRequestsList');
 const teacherRequestsEmpty=document.getElementById('teacherRequestsEmpty');
+const adminUserSearch=document.getElementById('adminUserSearch');
+const adminUserRoleFilter=document.getElementById('adminUserRoleFilter');
 const myExamsList=document.getElementById('myExams');
 const myExamsEmpty=document.getElementById('myExamsEmpty');
 const submissionsPanel=document.getElementById('submissionsPanel');
@@ -1999,6 +2001,115 @@ async function loadTeacherRequests(){
     }
 }
 
+// --- Admin users management ---
+async function loadAdminUsers(){
+    if(!adminUsersList) return;
+    adminUsersList.innerHTML='';
+    try{
+        const users=await request('/api/admin/users');
+        if(!Array.isArray(users) || !users.length){
+            adminUsersEmpty?.classList.remove('hidden');
+            return;
+        }
+        adminUsersEmpty?.classList.add('hidden');
+        // apply client-side filters: search and role
+        const query=(adminUserSearch?.value||'').trim().toLowerCase();
+        const roleFilter=(adminUserRoleFilter?.value||'all');
+
+        users.filter((u)=>{
+            if(roleFilter && roleFilter!=='all' && u.role!==roleFilter){
+                return false;
+            }
+            if(!query) return true;
+            const hay=( (u.name||'') + ' ' + (u.email||'') ).toLowerCase();
+            return hay.includes(query);
+        }).forEach((u)=>{
+            const li=document.createElement('li');
+            li.className='list-item';
+
+            const info=document.createElement('div');
+            info.innerHTML=`<strong>${escapeHtml(u.name||u.email||'Unknown')}</strong><div class="muted small">${escapeHtml(u.email||'')}</div>`;
+            li.appendChild(info);
+
+            const actions=document.createElement('div');
+                actions.className='actions-row';
+
+                // show role label instead of per-user dropdown (use global filter above)
+                const roleLabel=document.createElement('span');
+                roleLabel.className='muted';
+                roleLabel.textContent = u.role ? (u.role[0].toUpperCase()+u.role.slice(1)) : '';
+
+                const activateBtn=document.createElement('button');
+                activateBtn.type='button';
+                activateBtn.className='link-button';
+                activateBtn.textContent=u.isActive? 'Deactivate':'Activate';
+
+                // Disable self-edit
+                if(currentUser && currentUser._id && currentUser._id===u._id){
+                    activateBtn.disabled=true;
+                }
+
+                const resetBtn=document.createElement('button');
+                resetBtn.type='button';
+                resetBtn.className='secondary small';
+                resetBtn.textContent='Reset password';
+
+                actions.appendChild(roleLabel);
+                actions.appendChild(document.createTextNode(' '));
+                actions.appendChild(activateBtn);
+                actions.appendChild(document.createTextNode(' '));
+                actions.appendChild(resetBtn);
+
+                li.appendChild(actions);
+
+
+            activateBtn.addEventListener('click',async ()=>{
+                try{
+                    activateBtn.disabled=true;
+                    await request(`/api/admin/users/${u._id}/active`,{ method:'POST', body:{ isActive: !u.isActive } });
+                    // flip local state and update button label
+                    u.isActive = !u.isActive;
+                    activateBtn.textContent = u.isActive? 'Deactivate':'Activate';
+                    setMessage('User status updated','success');
+                }catch(err){
+                    console.error(err);
+                    setMessage(err.message||'Failed to update status','error');
+                    activateBtn.disabled=false;
+                }
+            });
+
+            resetBtn.addEventListener('click',async ()=>{
+                try{
+                    resetBtn.disabled=true;
+                    const resp=await request(`/api/admin/users/${u._id}/reset-password`,{ method:'POST' });
+                    const token=resp?.resetToken||resp?.resetToken;
+                    setMessage(`Reset token: ${token}`,'success');
+                }catch(err){
+                    console.error(err);
+                    setMessage(err.message||'Failed to reset password','error');
+                }finally{ resetBtn.disabled=false; }
+            });
+
+            adminUsersList.appendChild(li);
+        });
+    }catch(error){
+        console.error('Failed to load admin users',error);
+        setMessage(error.message||'Unable to load users','error');
+    }
+}
+
+// wire up search and role filter to reload list
+if(adminUserSearch){
+    adminUserSearch.addEventListener('input',()=>{
+        loadAdminUsers();
+    });
+}
+if(adminUserRoleFilter){
+    adminUserRoleFilter.addEventListener('change',()=>{
+        loadAdminUsers();
+    });
+}
+
 function escapeHtml(str){
     if(!str) return '';
     return String(str).replace(/[&<>"]/g,(c)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]);
@@ -3554,6 +3665,7 @@ function initialize(){
         // load teacher requests for admins
         if(isAdmin){
             loadTeacherRequests();
+            loadAdminUsers();
         }
     }
 }

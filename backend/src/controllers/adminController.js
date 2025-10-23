@@ -86,8 +86,99 @@ const removeTeacher=asyncHandler(async (req,res)=>{
     res.status(204).end();
 });
 
+// --- User management for admins ---
+const listUsers=asyncHandler(async (_req,res)=>{
+    const users=await User.find()
+        .select('-password -passwordResetToken -passwordResetExpires')
+        .populate('organizations','name')
+        .sort('name');
+
+    res.json(users);
+});
+
+const updateUserRole=asyncHandler(async (req,res)=>{
+    const { id } = req.params;
+    const { role } = req.body;
+    if(!id){
+        return res.status(400).json({ message:'User id is required.' });
+    }
+    if(!role || !['admin','instructor','student'].includes(role)){
+        return res.status(400).json({ message:'Invalid role.' });
+    }
+
+    const user=await User.findById(id);
+    if(!user){
+        return res.status(404).json({ message:'User not found.' });
+    }
+
+    user.role=role;
+    await user.save();
+
+    const updated=await User.findById(id).select('-password -passwordResetToken -passwordResetExpires').populate('organizations','name');
+    res.json(updated);
+});
+
+const setUserActive=asyncHandler(async (req,res)=>{
+    const { id } = req.params;
+    const { isActive } = req.body;
+    if(typeof isActive==='undefined'){
+        return res.status(400).json({ message:'isActive boolean is required.' });
+    }
+
+    const user=await User.findById(id);
+    if(!user){
+        return res.status(404).json({ message:'User not found.' });
+    }
+
+    user.isActive=Boolean(isActive);
+    await user.save();
+
+    res.status(204).end();
+});
+
+const crypto=require('crypto');
+const emailUtil=require('../utils/email');
+const config=require('../config/config');
+const resetUserPassword=asyncHandler(async (req,res)=>{
+    const { id } = req.params;
+    if(!id){
+        return res.status(400).json({ message:'User id is required.' });
+    }
+
+    const user=await User.findById(id);
+    if(!user){
+        return res.status(404).json({ message:'User not found.' });
+    }
+
+    // generate a one-time token
+    const token=crypto.randomBytes(20).toString('hex');
+    user.passwordResetToken=token;
+    user.passwordResetExpires=new Date(Date.now()+1000*60*60); // 1 hour
+    await user.save();
+
+    const frontendBase = config.FRONTEND_BASE_URL || '';
+    const resetUrl = `${frontendBase}/reset-password?token=${token}&email=${encodeURIComponent(user.email)}`;
+
+    // attempt to email the reset link, otherwise return token in response for dev/testing
+    try{
+        if(config.SMTP_HOST){
+            const subject='Password reset (admin)';
+            const text=`An administrator requested a password reset. Use this link to reset the password: ${resetUrl}`;
+            const html=`<p>An administrator requested a password reset for your account. Click below to reset your password:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`;
+            await emailUtil.sendMail({ to: user.email, subject, text, html });
+            return res.json({ message: 'Reset link emailed to the user' });
+        }
+    }catch(err){
+        console.error('Failed to send admin-initiated reset email',err);
+    }
+
+    // Dev fallback: return token and url
+    res.json({ resetToken: token, expiresAt: user.passwordResetExpires, resetUrl });
+});
+
 module.exports={
     listTeachers,
     createTeacher,
     removeTeacher
+    ,listUsers,updateUserRole,setUserActive,resetUserPassword
 };

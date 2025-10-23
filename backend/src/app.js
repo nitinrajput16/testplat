@@ -74,6 +74,14 @@ if(hasViewsDir){
         res.render('register',{ pageTitle:'Register', navActive:'register' });
     });
 
+    app.get('/forgot-password',(_req,res)=>{
+        res.render('forgot-password',{ pageTitle:'Forgot Password', navActive:'login' });
+    });
+
+    app.get('/reset-password',(_req,res)=>{
+        res.render('reset-password',{ pageTitle:'Reset Password', navActive:'login' });
+    });
+
     app.get('/dashboard',(_req,res)=>{
         res.render('dashboard-redirect',{ pageTitle:'Dashboard', navActive:'dashboard' });
     });
