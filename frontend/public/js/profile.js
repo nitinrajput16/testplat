@@ -233,8 +233,7 @@ function updateSubheading(role){
     }
     switch(role){
     case 'admin':
-        // Match instructor visual tone while preserving admin capabilities
-        profileSubheading.textContent='Share accurate details so students and fellow instructors can recognise you.';
+        profileSubheading.textContent='Manage your administrator identity and organizations linked to your account.';
         break;
     case 'instructor':
         profileSubheading.textContent='Share accurate details so students and fellow instructors can recognise you.';

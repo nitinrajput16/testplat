@@ -6,7 +6,7 @@ let transporterReady = false;
 
 async function initTransporter(){
     if(!config.SMTP_HOST || !config.SMTP_PORT || !config.SMTP_USER || !config.SMTP_PASS){
-        console.log('SMTP not fully configured; email will use fallback logging.');
+        // console.log('SMTP not fully configured; email will use fallback logging.');
         transporter = null;
         transporterReady = false;
         return;
@@ -33,7 +33,7 @@ async function initTransporter(){
         await t.verify();
         transporter = t;
         transporterReady = true;
-        console.log('SMTP transporter verified:', { host: config.SMTP_HOST, port: config.SMTP_PORT, secure: config.SMTP_SECURE });
+        // console.log('SMTP transporter verified:', { host: config.SMTP_HOST, port: config.SMTP_PORT, secure: config.SMTP_SECURE });
     }catch(err){
         transporter = null;
         transporterReady = false;
@@ -52,7 +52,7 @@ async function sendMail({ to, subject, text, html }){
     if(transporterReady && transporter){
         try{
             const result = await transporter.sendMail({ from, to, subject, text, html });
-            console.log('Email sent via SMTP to', to, 'messageId:', result && result.messageId);
+            // console.log('Email sent via SMTP to', to, 'messageId:', result && result.messageId);
             return result;
         }catch(err){
             console.error('SMTP sendMail failed, falling back to console. Error:', err && err.message ? err.message : err);
@@ -61,12 +61,7 @@ async function sendMail({ to, subject, text, html }){
     }
 
     // Fallback: log to console (useful for dev or when SMTP is unavailable)
-    console.log('Email fallback - not sent via SMTP');
-    console.log('From:', from);
-    console.log('To:', to);
-    console.log('Subject:', subject);
-    console.log('Text:', text);
-    if(html) console.log('HTML:', html);
+    // console.log('Email fallback - not sent via SMTP');
     return Promise.resolve();
 }
 

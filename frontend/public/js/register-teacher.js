@@ -1,6 +1,8 @@
 const form=document.getElementById('registerTeacherForm');
 const messageBox=document.getElementById('message');
 const backToLogin=document.getElementById('backToLogin');
+const organizationSelect=document.getElementById('organization');
+const submitButton=form?.querySelector('button[type="submit"]');
 
 function showMessage(text,type='error'){
     if(!messageBox) return;
@@ -17,7 +19,8 @@ async function submitRequest(e){
         name:formData.get('name').trim(),
         email:formData.get('email').trim().toLowerCase(),
         password:formData.get('password'),
-        message:formData.get('message')?.trim()
+        message:formData.get('message')?.trim(),
+        organizationId: formData.get('organizationId') || undefined
     };
 
     if(payload.password.length<8){
@@ -60,3 +63,37 @@ function goBack(){
 
 form?.addEventListener('submit',submitRequest);
 backToLogin?.addEventListener('click',goBack);
+
+async function loadOrganizations(){
+    if(!organizationSelect) return;
+
+    try{
+        const response=await fetch('/api/organizations/public');
+        if(!response.ok) throw new Error('Unable to load organizations');
+        const organizations=await response.json();
+
+        organizationSelect.innerHTML='<option value="">Select your organization</option>';
+
+        if(!organizations.length){
+            organizationSelect.disabled=true;
+            if(submitButton) submitButton.disabled=true;
+            return;
+        }
+
+        organizations.forEach((org)=>{
+            const option=document.createElement('option');
+            option.value=org._id;
+            option.textContent=org.name;
+            organizationSelect.appendChild(option);
+        });
+
+        organizationSelect.disabled=false;
+        if(submitButton) submitButton.disabled=false;
+    }catch(err){
+        console.error(err);
+        organizationSelect.disabled=true;
+        if(submitButton) submitButton.disabled=true;
+    }
+}
+
+loadOrganizations();

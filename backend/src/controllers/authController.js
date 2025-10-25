@@ -80,12 +80,23 @@ const registerTeacher=asyncHandler(async (req,res)=>{
         return res.status(409).json({ message:'An account with this email already exists.' });
     }
 
-    // create user as student by default; instructor role will be granted by admin when they approve the request
-    const user=await User.create({ name, email, password, role: 'student' });
+        // create user as student by default; instructor role will be granted by admin when they approve the request
+        const organizationId=req.body.organizationId;
 
-    // create a teacher request for admin review
-    const TeacherRequest = require('../models/TeacherRequest');
-    await TeacherRequest.create({ user: user._id, message: req.body.message || '' });
+        let organizations=[];
+        if(organizationId){
+            const org=await Organization.findById(organizationId);
+            if(!org){
+                return res.status(404).json({ message:'Selected organization was not found.' });
+            }
+            organizations=[org._id];
+        }
+
+        const user=await User.create({ name, email, password, role: 'student', organizations });
+
+        // create a teacher request for admin review
+        const TeacherRequest = require('../models/TeacherRequest');
+        await TeacherRequest.create({ user: user._id, message: req.body.message || '' });
 
     const token=generateToken(user);
 

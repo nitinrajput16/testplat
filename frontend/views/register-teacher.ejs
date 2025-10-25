@@ -32,6 +32,14 @@
             border-radius:6px;
             font-size:16px;
         }
+        select{
+            width:100%;
+            padding:10px 12px;
+            border:1px solid #cfd8dc;
+            border-radius:6px;
+            font-size:16px;
+            background-color:#ffffff;
+        }
         .alert{
             display:none;
             border-radius:6px;
@@ -61,6 +69,14 @@
         .switch a{
             color:#0077cc;
         }
+        .helper-text{
+            margin-top:4px;
+            font-size:13px;
+            color:#607d8b;
+        }
+        .helper-text.error{
+            color:#c62828;
+        }
     </style>
     <link rel="stylesheet" href="/css/theme-modern.css">
 </head>
@@ -82,6 +98,13 @@
             <div>
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Minimum 8 characters" required minlength="8">
+            </div>
+            <div>
+                <label for="organization">Organization</label>
+                <select id="organization" name="organizationId" required>
+                    <option value="">Select your organization</option>
+                </select>
+                <!-- <p id="organizationHelp" class="helper-text">Choose the organization provided by your school.</p> -->
             </div>
             <div>
                 <label for="message">Message for the admin (optional)</label>

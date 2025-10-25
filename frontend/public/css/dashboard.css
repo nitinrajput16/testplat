@@ -310,20 +310,6 @@ button.secondary:hover{
 .import-issues .muted{
     color:#6d4c41;
 }
-/* Improve styling for multiple-select fields (organization pickers) */
-form select[multiple],
-select[multiple]{
-    min-height:110px; /* make the multi-select taller so options are easier to read */
-    max-height:240px;
-    overflow-y:auto;
-    box-sizing:border-box;
-}
-
-/* Slightly reduce spacing for small hint text in those fields */
-#examOrganizationsHint, #customStudentEmails + .muted.small{
-    margin-top:6px;
-}
-
 .question-list-item{
     display:flex;
     flex-direction:column;

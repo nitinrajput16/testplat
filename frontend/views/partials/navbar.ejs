@@ -1,6 +1,6 @@
 <nav id="navbar">
     <ul>
-    <li data-auth="protected"><a href="/land" class="<%= navActive==='home' ? 'active' : '' %>">Home</a></li>
+    <li data-auth="both"><a href="/land" id="homeLink" class="<%= navActive==='home' ? 'active' : '' %>">Home</a></li>
     <li data-auth="protected"><a href="/dashboard" id="dashboardLink" class="<%= navActive==='dashboard' ? 'active' : '' %>">Dashboard</a></li>
     <li data-auth="protected"><a href="/profile" class="<%= navActive==='profile' ? 'active' : '' %>">Profile</a></li>
         <li data-auth="guest"><a href="/login" class="<%= navActive==='login' ? 'active' : '' %>">Login</a></li>
@@ -8,8 +8,8 @@
         <li data-auth="protected"><a href="#" id="logoutLink">Logout</a></li>
     </ul>
     <ul>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Services</a></li>
+        <!-- <li><a href=".section__inner">About</a></li> -->
+    <li><a href="/land#services" data-scroll="services">Services</a></li>
         <li><a href="#">Contact</a></li>
     </ul>
 </nav>
