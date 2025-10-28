@@ -64,6 +64,8 @@ initTransporter().catch(err=>{
 
 async function sendMail({ to, subject, text, html }){
     const from = config.MAIL_FROM || config.SMTP_FROM || config.SMTP_USER || config.DEFAULT_ADMIN_EMAIL;
+    const fromName = config.MAIL_FROM_NAME || '';
+    const fromHeader = fromName ? `${fromName} <${from}>` : from;
 
     // Prefer Brevo (Sendinblue) API if configured
     if(brevoConfigured && brevoClient){
@@ -74,7 +76,8 @@ async function sendMail({ to, subject, text, html }){
             // normalize recipients
             const recipients = Array.isArray(to) ? to : [to];
             sendSmtpEmail.to = recipients.map(r=>({ email: r }));
-            sendSmtpEmail.sender = { email: from };
+            // include name if present
+            sendSmtpEmail.sender = fromName ? { name: fromName, email: from } : { email: from };
             sendSmtpEmail.subject = subject;
             if(html) sendSmtpEmail.htmlContent = html;
             if(text) sendSmtpEmail.textContent = text;
@@ -83,14 +86,20 @@ async function sendMail({ to, subject, text, html }){
             return resp;
         }catch(err){
             console.error('Brevo sendTransacEmail failed, falling back to SMTP/console. Error:', err && err.body ? err.body : (err && err.message ? err.message : err));
-            // fall through to SMTP fallback
+            // fall through to SMTP fallback (unless API-only)
         }
+    }
+
+    // If configured to use API only, skip SMTP fallback entirely
+    if(true){
+        console.warn('EMAIL_API_ONLY enabled - skipping SMTP fallback. Email not sent to:', to);
+        return Promise.resolve({ ok: false, message: 'EMAIL_API_ONLY enabled and Brevo send failed or not configured' });
     }
 
     // Next try SMTP transporter if ready
     if(transporterReady && transporter){
         try{
-            const result = await transporter.sendMail({ from, to, subject, text, html });
+            const result = await transporter.sendMail({ from: fromHeader, to, subject, text, html });
             return result;
         }catch(err){
             console.error('SMTP sendMail failed, falling back to console. Error:', err && err.message ? err.message : err);
@@ -98,8 +107,8 @@ async function sendMail({ to, subject, text, html }){
     }
 
     // Final fallback: log to console (useful for dev or when neither Brevo nor SMTP are available)
-    console.log('Email fallback - not sent via provider. to:', to, 'subject:', subject);
-    return Promise.resolve();
+    console.log('Email fallback - not sent via provider. to:', to, 'subject:', subject, 'from:', fromHeader);
+    return Promise.resolve({ ok: false, message: 'No mail provider available' });
 }
 
 function getStatus(){

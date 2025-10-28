@@ -66,6 +66,12 @@ config.SMTP_USER = process.env.SMTP_USER || '';
 config.SMTP_PASS = process.env.SMTP_PASS || '';
 // From address to use when sending emails: env SMTP_FROM -> SMTP_USER -> DEFAULT_ADMIN_EMAIL
 config.SMTP_FROM = process.env.SMTP_FROM || config.SMTP_USER || config.DEFAULT_ADMIN_EMAIL;
+// General mail-from env (preferred) - fall back to SMTP_FROM and DEFAULT_ADMIN_EMAIL
+config.MAIL_FROM = process.env.MAIL_FROM || config.SMTP_FROM || config.DEFAULT_ADMIN_EMAIL;
+// Optional display name for the sender
+config.MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || '';
+// If true, only use API providers (Brevo/SendGrid) and do not attempt SMTP
+config.EMAIL_API_ONLY = parseBool(process.env.EMAIL_API_ONLY);
 // Convenience flag to indicate SMTP is properly configured
 config.SMTP_ENABLED = Boolean(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS && config.SMTP_PORT);
 
