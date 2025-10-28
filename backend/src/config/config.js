@@ -33,12 +33,6 @@ function parseBool(v){
     return String(v).toLowerCase() === 'true' || String(v) === '1' || String(v).toLowerCase() === 'yes';
 }
 
-function parsePort(v){
-    if(!v && v !== 0) return undefined;
-    const n = Number(v);
-    return Number.isFinite(n) && n > 0 ? n : undefined;
-}
-
 function normalizeUrl(u){
     if(!u) return '';
     let s = String(u).trim();
@@ -58,28 +52,14 @@ const config = {
     DEFAULT_ADMIN_FORCE_RESET: parseBool(process.env.DEFAULT_ADMIN_FORCE_RESET)
 };
 
-// Optional SMTP settings (use environment variables to configure)
-config.SMTP_HOST = process.env.SMTP_HOST || '';
-config.SMTP_PORT = parsePort(process.env.SMTP_PORT) || undefined;
-config.SMTP_SECURE = parseBool(process.env.SMTP_SECURE);
-config.SMTP_USER = process.env.SMTP_USER || '';
-config.SMTP_PASS = process.env.SMTP_PASS || '';
-// From address to use when sending emails: env SMTP_FROM -> SMTP_USER -> DEFAULT_ADMIN_EMAIL
-config.SMTP_FROM = process.env.SMTP_FROM || config.SMTP_USER || config.DEFAULT_ADMIN_EMAIL;
 // General mail-from env (preferred) - fall back to SMTP_FROM and DEFAULT_ADMIN_EMAIL
 config.MAIL_FROM = process.env.MAIL_FROM || config.SMTP_FROM || config.DEFAULT_ADMIN_EMAIL;
-// Optional display name for the sender
-config.MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || '';
 // If true, only use API providers (Brevo/SendGrid) and do not attempt SMTP
 config.EMAIL_API_ONLY = parseBool(process.env.EMAIL_API_ONLY);
 // Convenience flag to indicate SMTP is properly configured
 config.SMTP_ENABLED = Boolean(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS && config.SMTP_PORT);
 
-// Decide frontend base URL:
-// 1) explicit FRONTEND_BASE_URL env
-// 2) Render's automatically provided RENDER_EXTERNAL_URL (when deployed on Render)
-// 3) fallback to localhost for non-production
-const rawFrontend = process.env.FRONTEND_BASE_URL || process.env.RENDER_EXTERNAL_URL || '';
+const rawFrontend = process.env.RENDER_EXTERNAL_URL || process.env.FRONTEND_BASE_URL || '';
 config.FRONTEND_BASE_URL = normalizeUrl(rawFrontend) || (config.NODE_ENV === 'production' ? '' : `http://localhost:${config.PORT}`);
 
 module.exports = config;
