@@ -17,7 +17,6 @@ for(const p of candidates){
         if(fs.existsSync(p)){
             dotenv.config({ path: p });
             loaded = true;
-            // stop at first found
             break;
         }
     }catch(e){ /* ignore */ }
@@ -43,7 +42,6 @@ function parsePort(v){
 function normalizeUrl(u){
     if(!u) return '';
     let s = String(u).trim();
-    // remove trailing slash
     if(s.endsWith('/')) s = s.slice(0, -1);
     return s;
 }
@@ -71,8 +69,6 @@ config.SMTP_FROM = process.env.SMTP_FROM || config.SMTP_USER || config.DEFAULT_A
 // Convenience flag to indicate SMTP is properly configured
 config.SMTP_ENABLED = Boolean(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS && config.SMTP_PORT);
 
-// Frontend base URL for deeplinks (e.g. https://example.com). If not set in env and not production,
-// default to localhost with the API port to make local testing easier.
 // Decide frontend base URL:
 // 1) explicit FRONTEND_BASE_URL env
 // 2) Render's automatically provided RENDER_EXTERNAL_URL (when deployed on Render)
