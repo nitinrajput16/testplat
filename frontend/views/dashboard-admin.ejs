@@ -45,7 +45,12 @@
                         </div>
                         <div class="field">
                             <label for="teacherPassword">Temporary password</label>
-                            <input id="teacherPassword" name="password" type="password" placeholder="Minimum 8 characters" minlength="8" required>
+                            <div class="password-field" style="position:relative; display:flex; align-items:center;">
+                                <input id="teacherPassword" name="password" type="password" placeholder="Minimum 8 characters" minlength="8" required style="flex:1; padding-right:30px;">
+                                <button type="button" class="password-toggle" data-target="teacherPassword" aria-label="Show password" style="position:absolute; right:8px; background:transparent; border:none; cursor:pointer; color:inherit;">
+                                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="field">
                             <label for="teacherOrganization">Assign to organization (optional)</label>

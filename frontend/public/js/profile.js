@@ -291,6 +291,16 @@ function renderProfile({ user, meta }){
         profileOrganizationsField.classList.add('hidden');
     }
 
+    const becomeTeacher=document.getElementById('becomeTeacher');
+    if(becomeTeacher){
+        if(profile.role==='student'){
+            becomeTeacher.classList.remove('hidden');
+        }
+        else{
+            becomeTeacher.classList.add('hidden');
+        }
+    }
+
     // Show or hide become-teacher action for students
     if(becomeTeacherBtn){
         if(profile.role==='student'){

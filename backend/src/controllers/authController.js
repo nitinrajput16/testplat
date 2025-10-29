@@ -106,6 +106,7 @@ const registerTeacher=asyncHandler(async (req,res)=>{
 const login=asyncHandler(async (req,res)=>{
     const email=req.body.email?.toLowerCase();
     const password=req.body.password;
+    const requestedRole = req.body.role;
 
     if(!isValidEmail(email)||!validatePassword(password)){
         return res.status(400).json({ message:'Invalid credentials.' });
@@ -119,6 +120,14 @@ const login=asyncHandler(async (req,res)=>{
     const passwordMatch=await user.comparePassword(password);
     if(!passwordMatch){
         return res.status(401).json({ message:'Invalid email or password.' });
+    }
+
+    // If the client requested a role, enforce that it matches the stored user role to prevent role spoofing
+    if(requestedRole){
+        const normalizedRequestedRole = String(requestedRole).trim().toLowerCase();
+        if(normalizedRequestedRole && normalizedRequestedRole !== user.role){
+            return res.status(403).json({ message: 'Selected role does not match your account. Please choose the correct role.' });
+        }
     }
 
     const token=generateToken(user);

@@ -97,14 +97,18 @@
             </div>
             <div>
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Minimum 8 characters" required minlength="8">
+                <div class="password-field" style="position:relative; display:flex; align-items:center;">
+                    <input type="password" id="password" name="password" placeholder="Minimum 8 characters" required minlength="8" style="flex:1; padding-right:30px;">
+                    <button type="button" class="password-toggle" data-target="password" aria-label="Show password" style="position:absolute; right:8px; background:transparent; border:none; cursor:pointer; color:inherit;">
+                        <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
             <div>
                 <label for="organization">Organization</label>
                 <select id="organization" name="organizationId" required>
                     <option value="">Select your organization</option>
                 </select>
-                <!-- <p id="organizationHelp" class="helper-text">Choose the organization provided by your school.</p> -->
             </div>
             <div>
                 <label for="message">Message for the admin (optional)</label>
@@ -115,7 +119,7 @@
                 <button type="button" id="backToLogin" class="secondary">Back to Login</button>
             </div>
         </form>
-        <p class="switch">After approval, you will be granted instructor access. <a href="/login">Back to login</a>.</p>
+        <p class="switch">Already have an account? <a href="/login">Sign in here</a>.</p>
     </main>
 
     <%- include('partials/footer') %>

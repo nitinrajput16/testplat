@@ -72,15 +72,30 @@
                 <form id="passwordUpdateForm" novalidate>
                     <div class="field">
                         <label for="currentPasswordInput">Current password</label>
-                        <input type="password" id="currentPasswordInput" name="currentPassword" autocomplete="current-password" minlength="8" required>
+                        <div class="password-field" style="position:relative; display:flex; align-items:center;">
+                            <input type="password" id="currentPasswordInput" name="currentPassword" autocomplete="current-password" minlength="8" required style="flex:1; padding-right:40px;">
+                            <button type="button" class="password-toggle" data-target="currentPasswordInput" aria-label="Show password" style="position:absolute; right:8px; background:transparent; border:none; cursor:pointer; color:inherit;">
+                                <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="field">
                         <label for="newPasswordInput">New password</label>
-                        <input type="password" id="newPasswordInput" name="password" autocomplete="new-password" minlength="8" required>
+                        <div class="password-field" style="position:relative; display:flex; align-items:center;">
+                            <input type="password" id="newPasswordInput" name="password" autocomplete="new-password" minlength="8" required style="flex:1; padding-right:40px;">
+                            <button type="button" class="password-toggle" data-target="newPasswordInput" aria-label="Show password" style="position:absolute; right:8px; background:transparent; border:none; cursor:pointer; color:inherit;">
+                                <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="field">
                         <label for="confirmPasswordInput">Confirm new password</label>
-                        <input type="password" id="confirmPasswordInput" name="confirmPassword" autocomplete="new-password" minlength="8" required>
+                        <div class="password-field" style="position:relative; display:flex; align-items:center;">
+                            <input type="password" id="confirmPasswordInput" name="confirmPassword" autocomplete="new-password" minlength="8" required style="flex:1; padding-right:30px;">
+                            <button type="button" class="password-toggle" data-target="confirmPasswordInput" aria-label="Show password" style="position:absolute; right:8px; background:transparent; border:none; cursor:pointer; color:inherit;">
+                                <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <p class="muted small">Passwords must be at least 8 characters long.</p>
                     <div class="actions">
@@ -89,9 +104,7 @@
                 </form>
             </article>
 
-            <% /* Show 'Become a teacher' only to users with role 'student' (hide for guests, teachers and admins) */ %>
-            <% if(currentUser && currentUser.role === 'student'){ %>
-            <article class="card profile-teacher-card">
+            <article class="card profile-teacher-card hidden" id="becomeTeacher">
                 <h2>Become a teacher</h2>
                 <div class="muted small">If you'd like to teach on this platform, submit a request. An administrator will review and approve your request.</div>
                 <div id="becomeTeacherWrap" class="profile-actions">
@@ -99,7 +112,6 @@
                     <p id="becomeTeacherNote" class="muted small hidden">Request submitted. Awaiting admin approval.</p>
                 </div>
             </article>
-            <% } %>
         </section>
     </main>
 
