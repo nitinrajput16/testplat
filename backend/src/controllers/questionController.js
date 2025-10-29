@@ -318,9 +318,9 @@ const normalizeQuestionPayload=(body)=>{
         const timeLimit=Number.isFinite(timeLimitRaw) && timeLimitRaw>0
             ? Math.min(timeLimitRaw,20)
             :5;
-        const memoryLimit=Number.isFinite(memoryLimitRaw) && memoryLimitRaw>=64000
-            ? Math.min(memoryLimitRaw,512000)
-            :128000;
+        const memoryLimit=Number.isFinite(memoryLimitRaw) && memoryLimitRaw>=48000
+            ? Math.min(memoryLimitRaw,128000)
+            : 64000;
 
         const rawTestCases=Array.isArray(codeSettingsInput.testCases)
             ? codeSettingsInput.testCases

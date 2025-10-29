@@ -25,6 +25,66 @@ function safeToString(value){
     return '';
 }
 
+function extractIpAddress(request){
+    // Check common headers set by proxies (in order)
+    const headers = request.headers || {};
+    const headerChecks = [
+        'x-forwarded-for',
+        'x-real-ip',
+        'cf-connecting-ip',
+        'true-client-ip',
+        'x-client-ip',
+        'x-forwarded',
+        'forwarded'
+    ];
+
+    for(const h of headerChecks){
+        const val = headers[h];
+        if(!val) continue;
+        let first = Array.isArray(val) ? val[0] : String(val).split(',')[0];
+        if(!first) continue;
+        first = String(first).trim();
+        if(first.toLowerCase().startsWith('for=')){
+            first = first.slice(4);
+            const semi = first.indexOf(';');
+            if(semi !== -1) first = first.slice(0, semi);
+        }
+        if(first.startsWith('"') && first.endsWith('"')){
+            first = first.slice(1, -1);
+        }
+        if(first.startsWith('[') && first.endsWith(']')){
+            first = first.slice(1, -1);
+        }
+        if(first.indexOf(']:') !== -1){
+            first = first.split(']:')[0];
+            if(first.startsWith('[')) first = first.slice(1);
+        } else if(first.indexOf(':') !== -1 && first.indexOf('.') !== -1){
+            // IPv4 with port
+            first = first.split(':')[0];
+        }
+        if(first && first.toLowerCase() !== 'unknown') return normalizeIp(first.trim());
+    }
+
+    const remote = request.socket?.remoteAddress || request.connection?.remoteAddress || '';
+    return normalizeIp(remote);
+}
+
+function normalizeIp(ip){
+    if(!ip) return '';
+    if(typeof ip === 'string' && ip.startsWith('::ffff:')){
+        return ip.replace('::ffff:','');
+    }
+    const idx = ip.indexOf(':');
+    if(idx!==-1 && ip.split(':').length>2){
+        // likely IPv6, return as-is
+        return ip;
+    }
+    if(idx!==-1 && ip.indexOf('.')!==-1){
+        return ip.split(':')[0];
+    }
+    return ip;
+}
+
 function normaliseObjectId(value){
     if(!value){
         return null;
@@ -49,10 +109,7 @@ function initialiseAntiCheatGateway(server){
             const token=requestUrl.searchParams.get('token');
             const examIdParam=requestUrl.searchParams.get('examId');
             const sessionIdParam=requestUrl.searchParams.get('sessionId');
-            const forwardedFor=request.headers['x-forwarded-for'];
-            const ipAddress=Array.isArray(forwardedFor)
-                ? forwardedFor[0]
-                : ((forwardedFor||'').split(',')[0]||request.socket?.remoteAddress||'');
+            const ipAddress = extractIpAddress(request);
 
             if(!token){
                 socket.close(1008,'Authentication required');
@@ -123,8 +180,12 @@ function initialiseAntiCheatGateway(server){
             if(!session.metadata?.userAgent && socket.context.userAgent){
                 updatePayload['metadata.userAgent']=socket.context.userAgent;
             }
-            if(!session.metadata?.ipAddress && ipAddress){
-                updatePayload['metadata.ipAddress']=ipAddress;
+            if(!session.metadata?.ipAddress && socket.context.ipAddress){
+                updatePayload['metadata.ipAddress']=socket.context.ipAddress;
+            }
+            if(session.metadata?.ipAddress && socket.context.ipAddress && session.metadata.ipAddress !== socket.context.ipAddress){
+                updatePayload['metadata.additional.ipAddressChangedAt']=new Date();
+                updatePayload['metadata.additional.previousIpAddress']=session.metadata.ipAddress;
             }
             updatePayload['metadata.additional.lastSocketConnectedAt']=new Date();
 

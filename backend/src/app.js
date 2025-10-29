@@ -53,27 +53,6 @@ app.use('/api/code',codeExecutionRoutes);
 app.use('/api/users',userRoutes);
 app.use('/api/teacher-requests',teacherRequestRoutes);
 
-// Temporary test endpoint to exercise the mailer (POST { to })
-app.post('/api/test-send', async (req, res) => {
-    try {
-        const emailUtil = require('./utils/email');
-        const config = require('./config/config');
-        const to = req.body?.to || process.env.MAIL_FROM || '';
-        if(!to) return res.status(400).json({ message: 'Recipient (to) or MAIL_FROM must be set' });
-
-        const subject = req.body?.subject || 'Test email from TestPlat';
-        const text = req.body?.text || 'This is a test email to verify delivery.';
-
-        const resp = await emailUtil.sendMail({ to, subject, text, html: `<p>${text}</p>` });
-
-        const usedFrom = config.MAIL_FROM_NAME ? `${config.MAIL_FROM_NAME} <${config.MAIL_FROM}>` : config.MAIL_FROM;
-        return res.json({ ok: true, usedFrom, resp });
-    } catch (err) {
-        console.error('Test send failed', err && (err.stack || err));
-        return res.status(500).json({ ok: false, error: err && err.message ? err.message : String(err) });
-    }
-});
-
 if(hasViewsDir){
     app.get('/',(_req,res)=>{
         res.redirect('/land');

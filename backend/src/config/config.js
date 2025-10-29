@@ -59,11 +59,7 @@ const config = {
 };
 
 // General mail-from env (preferred) - fall back to SMTP_FROM and DEFAULT_ADMIN_EMAIL
-config.MAIL_FROM = process.env.MAIL_FROM || config.SMTP_FROM || config.DEFAULT_ADMIN_EMAIL;
-// If true, only use API providers (Brevo/SendGrid) and do not attempt SMTP
-config.EMAIL_API_ONLY = parseBool(process.env.EMAIL_API_ONLY);
-// Convenience flag to indicate SMTP is properly configured
-config.SMTP_ENABLED = Boolean(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS && config.SMTP_PORT);
+config.MAIL_FROM = process.env.MAIL_FROM || '';
 
 // 3) fallback to localhost for non-production
 const rawFrontend =process.env.RENDER_EXTERNAL_URL || process.env.FRONTEND_BASE_URL || '';

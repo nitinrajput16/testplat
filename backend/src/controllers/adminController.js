@@ -168,7 +168,7 @@ const resetUserPassword=asyncHandler(async (req,res)=>{
     // generate a one-time token
     const token=crypto.randomBytes(20).toString('hex');
     user.passwordResetToken=token;
-    user.passwordResetExpires=new Date(Date.now()+1000*60*60); // 1 hour
+    user.passwordResetExpires=new Date(Date.now()+1000*60*30); // 30 minutes
     await user.save();
 
     const frontendBase = config.FRONTEND_BASE_URL || '';
@@ -176,7 +176,7 @@ const resetUserPassword=asyncHandler(async (req,res)=>{
 
     // attempt to email the reset link, otherwise return token in response for dev/testing
     try{
-        if(config.SMTP_HOST){
+        {
             const subject='Password reset (admin)';
             const text=`An administrator requested a password reset. Use this link to reset the password: ${resetUrl}`;
             const html=`<p>An administrator requested a password reset for your account. Click below to reset your password:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`;
@@ -188,7 +188,7 @@ const resetUserPassword=asyncHandler(async (req,res)=>{
     }
 
     // Dev fallback: return token and url
-    res.json({ resetToken: token, expiresAt: user.passwordResetExpires, resetUrl });
+    // res.json({ resetToken: token, expiresAt: user.passwordResetExpires, resetUrl });
 });
 
 module.exports={
