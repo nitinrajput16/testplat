@@ -2012,7 +2012,6 @@ async function loadAdminUsers(){
             return;
         }
         adminUsersEmpty?.classList.add('hidden');
-        // apply client-side filters: search and role
         const query=(adminUserSearch?.value||'').trim().toLowerCase();
         const roleFilter=(adminUserRoleFilter?.value||'all');
 
@@ -2034,7 +2033,6 @@ async function loadAdminUsers(){
             const actions=document.createElement('div');
                 actions.className='actions-row';
 
-                // show role label instead of per-user dropdown (use global filter above)
                 const roleLabel=document.createElement('span');
                 roleLabel.className='muted';
                 roleLabel.textContent = u.role ? (u.role[0].toUpperCase()+u.role.slice(1)) : '';
@@ -2044,7 +2042,6 @@ async function loadAdminUsers(){
                 activateBtn.className='link-button';
                 activateBtn.textContent=u.isActive? 'Deactivate':'Activate';
 
-                // Disable self-edit
                 if(currentUser && currentUser._id && currentUser._id===u._id){
                     activateBtn.disabled=true;
                 }
@@ -2287,7 +2284,7 @@ function renderMyExams(){
         editExamButton.dataset.action='edit-exam';
         editExamButton.dataset.examId=exam._id;
         editExamButton.textContent='Edit details';
-    editExamButton.disabled=editingExamId===exam._id;
+        editExamButton.disabled=editingExamId===exam._id;
         actions.appendChild(editExamButton);
 
         const viewSubmissionsButton=document.createElement('button');

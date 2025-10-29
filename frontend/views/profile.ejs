@@ -89,8 +89,8 @@
                 </form>
             </article>
 
-            <% /* Only show 'Become a teacher' to students or unauthenticated users */ %>
-            <% if(typeof currentUser === 'undefined' || !currentUser || currentUser.role === 'student'){ %>
+            <% /* Show 'Become a teacher' only to users with role 'student' (hide for guests, teachers and admins) */ %>
+            <% if(currentUser && currentUser.role === 'student'){ %>
             <article class="card profile-teacher-card">
                 <h2>Become a teacher</h2>
                 <div class="muted small">If you'd like to teach on this platform, submit a request. An administrator will review and approve your request.</div>

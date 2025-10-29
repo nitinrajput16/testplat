@@ -123,7 +123,7 @@ window.addEventListener('load', () => {
                             currentIndex = (currentIndex + 1) % words.length;
                             cycleWords();
                         });
-                    }, 2000); // Pause for 2 seconds after typing
+                    }, 2000);
                 });
             }
             
@@ -255,42 +255,6 @@ window.addEventListener('load', () => {
             }
         });
     }
-
-    // gsap.utils.toArray('.pill-badge').forEach((badge) => {
-    //     if (modernBadges.includes(badge)) return;
-
-    //     gsap.from(badge, {
-    //         opacity: 0,
-    //         y: 32,
-    //         duration: 0.8,
-    //         ease: easeOut,
-    //         scrollTrigger: {
-    //             trigger: badge,
-    //             start: 'top 80%',
-    //             once: true
-    //         }
-    //     });
-    // });
-
-    // gsap.utils.toArray('.feature-grid').forEach((grid) => {
-    //     if (modernGrids.includes(grid)) return;
-
-    //     const cards = grid.querySelectorAll('.feature-card');
-    //     if (!cards.length) return;
-
-    //     gsap.from(cards, {
-    //         opacity: 0,
-    //         y: 70,
-    //         duration: 1,
-    //         ease: easeOut,
-    //         stagger: 0.12,
-    //         scrollTrigger: {
-    //             trigger: grid,
-    //             start: 'top 82%',
-    //             once: true
-    //         }
-    //     });
-    // });
 
     gsap.from('.section--halo .logo-strip__item', {
         opacity: 0,

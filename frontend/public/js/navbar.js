@@ -60,19 +60,13 @@
             window.location.href='/login';
         });
     }
-
-    // Smooth scroll for anchors that point to sections on the landing page.
-    // Links use `data-scroll="<id>"` and href already points to `/land#id` as a fallback.
     try{
         const scrollLinks=document.querySelectorAll('a[data-scroll]');
         const currentPath=window.location.pathname.replace(/\/$/,'');
-
-        // On initial load, if there's a hash, attempt to scroll to it smoothly
         if(window.location.hash){
             const id=window.location.hash.replace('#','');
             const el=document.getElementById(id);
             if(el){
-                // small timeout to allow page layout to settle
                 setTimeout(()=>{
                     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 60);
@@ -82,19 +76,16 @@
         scrollLinks.forEach(link=>{
             link.addEventListener('click', (ev)=>{
                 const targetId=link.getAttribute('data-scroll');
-                // If already on the landing page, do smooth in-page scroll
                 if(currentPath === '/land' || currentPath === '' || currentPath === '/home' || currentPath === '/'){
                     ev.preventDefault();
                     const el=document.getElementById(targetId);
                     if(el){
                         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }else{
-                        // fallback: navigate to hash so browser will try to jump
                         window.location.hash = targetId;
                     }
                     return;
                 }
-                // Otherwise let the browser navigate to /land#id (href already set). No need to preventDefault.
             });
         });
     }catch(e){

@@ -119,8 +119,6 @@ const antiCheatMonitor=(()=>{
     const EVENT_TYPES={
         TAB_HIDDEN:'TAB_HIDDEN',
         TAB_VISIBLE:'TAB_VISIBLE',
-        WINDOW_BLUR:'WINDOW_BLUR',
-        WINDOW_FOCUS:'WINDOW_FOCUS',
         CONTEXT_MENU:'CONTEXT_MENU',
         COPY:'COPY',
         CUT:'CUT',
@@ -181,12 +179,8 @@ const antiCheatMonitor=(()=>{
                 socket.removeEventListener('error',socketHandlers.handleError);
                 socket.removeEventListener('message',socketHandlers.handleMessage);
             }
-            try{
-                if(socket.readyState===WebSocket.OPEN || socket.readyState===WebSocket.CONNECTING){
-                    socket.close(1000,'anti-cheat-stop');
-                }
-            }catch(_error){
-                /* noop */
+            if(socket.readyState===WebSocket.OPEN || socket.readyState===WebSocket.CONNECTING){
+                socket.close(1000,'anti-cheat-stop');
             }
         }
         socket=null;
@@ -270,21 +264,6 @@ const antiCheatMonitor=(()=>{
         }
     }
 
-    function handleWindowBlur(){
-        if(document.visibilityState==='hidden'){
-            shouldWarnOnFocus=true;
-        }
-        report(EVENT_TYPES.WINDOW_BLUR,{});
-    }
-
-    function handleWindowFocus(){
-        report(EVENT_TYPES.WINDOW_FOCUS,{});
-        if(shouldWarnOnFocus && document.visibilityState==='visible'){
-            triggerTabSwitchWarning();
-            shouldWarnOnFocus=false;
-        }
-    }
-
     function handleContextMenu(event){
         if(event instanceof Event){
             event.preventDefault();
@@ -337,8 +316,6 @@ const antiCheatMonitor=(()=>{
     function attachListeners(){
         removeListeners();
         addListener(document,'visibilitychange',handleVisibilityChange,false);
-        addListener(window,'blur',handleWindowBlur,true);
-        addListener(window,'focus',handleWindowFocus,true);
         addListener(document,'contextmenu',handleContextMenu,true);
         addListener(document,'copy',handleCopy,true);
         addListener(document,'cut',handleCut,true);
@@ -388,9 +365,6 @@ const antiCheatMonitor=(()=>{
             },
             handleError:(error)=>{
                 console.warn('[anti-cheat] channel error',error);
-            },
-            handleMessage:()=>{
-                // Reserved for future acknowledgement handling.
             }
         };
 

@@ -15,7 +15,6 @@ forgotForm?.addEventListener('submit', async (e)=>{
         if(!res.ok){ showMsg(payload.message||'Request failed'); return; }
         if(payload.token){ // dev fallback
             showMsg(`Reset token (dev-only): ${payload.token}`,'success');
-            console.log('Reset URL:', payload.resetUrl);
             return;
         }
         showMsg(payload.message||'If that account exists, a reset link was sent','success');
